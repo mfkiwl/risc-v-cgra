@@ -75,11 +75,14 @@ module alu(
 			end
            //ALU_Result = (A>B)?32'd1:32'd0 ;
           4'b1111: // SRA shift right arithmetic   
-            y = A;
-				for (i = B; i > 0; i = i - 1) begin
-					y = {y[31],y[31:1]};
-				end
-				ALU_Result = y;
+            begin
+               y = A;
+				   for (i = B; i > 0; i = i - 1) 
+               begin
+					   y = {y[31],y[31:1]};
+				   end
+				   ALU_Result = y;
+            end
           default: ALU_Result = A + B ; 
         endcase
     end
