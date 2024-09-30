@@ -4,12 +4,11 @@ module alu(
            input [31:0] A,B,  // ALU 32-bit Inputs                 
            input [3:0] ALU_Sel,// ALU Selection
            output [31:0] ALU_Out, // ALU 32-bit Output
-           output CarryOut // Carry Out Flag
+           output CarryOut, // Carry Out Flag
            output Zero //Zero flag when ALU output is 0
     );
     integer i;
     reg [31:0] ALU_Result;
-    reg sign;
     reg zeroOut;
     wire [32:0] tmp;
     reg [31:0] y;
@@ -27,7 +26,14 @@ module alu(
         4'b0010: // Multiplication
            ALU_Result = A * B;
         4'b0011: // Division
-           ALU_Result = A/B;
+           if (B != 0 )
+           begin
+               ALU_Result = A/B;
+           end
+           else begin
+               $display("We cannot divide by 0");
+               ALU_Result = 32'hFFFFFFFF;
+           end
         4'b0100: // Logical shift left
            ALU_Result = A<<1;
          4'b0101: // Logical shift right
@@ -47,23 +53,23 @@ module alu(
           4'b1100: // Logical nand 
            ALU_Result = ~(A & B);
           4'b1101: // SLTU
-           ALUResult = A < B;
+           ALU_Result = A < B;
           4'b1110: // Set on less than
              begin // SLT
 				if (A[31] != B[31]) begin
 					if (A[31] > B[31]) begin
-						ALUResult = 1;
+						ALU_Result = 1;
 					end else begin
-						ALUResult = 0;
+						ALU_Result = 0;
 					end
 				end else begin
 					if (A < B)
 					begin
-						ALUResult = 1;
+						ALU_Result = 1;
 					end
 					else
 					begin
-						ALUResult = 0;
+						ALU_Result = 0;
 					end
 				end
 			end
@@ -73,18 +79,13 @@ module alu(
 				for (i = B; i > 0; i = i - 1) begin
 					y = {y[31],y[31:1]};
 				end
-				ALUResult = y;
+				ALU_Result = y;
           default: ALU_Result = A + B ; 
         endcase
     end
 
-    always @(ALUResult) begin
-		if (ALUResult == 0) begin
-			Zero <= 1;
-		end else begin
-			Zero <= 0;
-		end
-	
-	end
+    always @(ALU_Result) begin
+        zeroOut <= (ALU_Result == 0) ? 1 : 0; 
+    end
 
 endmodule
