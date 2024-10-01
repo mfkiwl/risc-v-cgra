@@ -1,20 +1,18 @@
-// MUX 3:1 para seleccion de entradas
+module mux3_1 (
+    input      [31:0] in_1,
+    input      [31:0] in_2,
+    input      [31:0] in_3,
+    input      [1:0]  sel,
+    output reg [31:0] data_out
+);
 
-module mux3_1(in_1, in_2, in_3, sel, data_out);
-
-input      [31:0] in_1;
-input      [31:0] in_2;
-input      [31:0] in_3;
-input      [1:0]  sel;
-output     [31:0] data_out;
-
-if(sel[1]==1)
-{
-    assign data_out = in_3;
-}
-else {
-    assign data_out = sel[0] ? in_2 : in_1; 
-}
-
+    always @(*) begin
+        case(sel)
+            2'b00: data_out = in_1; // Select in_1
+            2'b01: data_out = in_2; // Select in_2
+            2'b10: data_out = in_3; // Select in_3
+            default: data_out = 32'b0; // Default case (optional)
+        endcase
+    end
 
 endmodule

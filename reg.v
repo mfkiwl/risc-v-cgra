@@ -1,16 +1,21 @@
 //Modelo del registro de 32 bits para registro de instrucciones y registros de entrada
 
-module Register(clock, r_enable, data_in, data_out);
+module Register (
+    input             clock,
+    input             r_enable,
+    input      [31:0] data_in,
+    input             reset, // Add reset signal
+    output reg [31:0] data_out
+);
+    
 
-input             clock;
-input             r_enable;
-input      [31:0] data_in;
-output reg [31:0] data_out;
-
-always @(posedge clock)
-begin
-    if(r_enable)
-        data_out <= data_in;
-end
+    always @(posedge clock or posedge reset) begin
+        if (reset) begin
+            data_out <= 32'b0; // Reset the output to 0
+        end else if (r_enable) begin
+            data_out <= data_in; // Load data on enable
+        end
+    end
 
 endmodule
+
