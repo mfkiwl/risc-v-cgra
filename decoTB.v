@@ -11,7 +11,7 @@ module tb_decoder;
     wire [2:0] op;
     wire [1:0] prefix;
     wire [3:0] funct;
-    wire [6:0] nalloc;
+    wire [5:0] nalloc;
     wire endF;
     wire immab;
     wire [5:0] immlo;
@@ -78,7 +78,7 @@ module tb_decoder;
         //#10;
 
         // Test case 6: Case fragment end/start
-        //instruction = 32'b101_0_000000000000000000000_1110011;
+        //instruction = 32'b101_0_0000000000000000000000_110011;
         //#10;
 
         // Test case 7: Invalid opcode (default case)

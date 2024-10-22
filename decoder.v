@@ -6,7 +6,7 @@ input  [31:0] instruction;
 output reg [2:0]  op;
 output reg [1:0]  prefix;
 output reg [3:0]  funct;
-output reg [6:0]  nalloc;
+output reg [5:0]  nalloc;
 output reg        endF;
 output reg        immab;
 output reg [5:0]  immlo;
@@ -39,7 +39,7 @@ always @(*) begin
     tt2 = 2'b00;
     tt3 = 2'b00;
     tt4 = 2'b00;
-    nalloc = 7'b0000000;
+    nalloc = 6'b0000000;
     endF = 1'b0;
 
     case (op)
@@ -80,7 +80,7 @@ always @(*) begin
         3'b101: // Case fragment end/start
             begin
                 endF = instruction[28];
-                nalloc = instruction[6:0];
+                nalloc = instruction[5:0];
             end
         default: 
             begin
