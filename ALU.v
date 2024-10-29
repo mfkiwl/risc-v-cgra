@@ -4,7 +4,6 @@ module alu(
            input [31:0] A,B,  // ALU 32-bit Inputs                 
            input [3:0] ALU_Sel,// ALU Selection
            output [31:0] ALU_Out, // ALU 32-bit Output
-           output CarryOut, // Carry Out Flag
            output Zero //Zero flag when ALU output is 0
     );
     integer i;
@@ -14,7 +13,6 @@ module alu(
     reg [31:0] y;
     assign ALU_Out = ALU_Result; // ALU out
     assign tmp = {1'b0,A} + {1'b0,B};
-    assign CarryOut = tmp[32]; // Carryout flag
     assign Zero = zeroOut;
     always @(*)
     begin

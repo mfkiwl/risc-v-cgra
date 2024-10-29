@@ -1,10 +1,9 @@
 // Instruction decoder module
 
-module decoder (op, prefix, nalloc, endF, funct, immab, immlo, immhi, ta1, ta2, ta3, ta4, tt1, tt2, tt3, tt4, offset, instruction);
+module decoder (op, nalloc, endF, funct, immab, immlo, immhi, ta1, ta2, ta3, ta4, tt1, tt2, tt3, tt4, offset, instruction);
 
 input  [31:0] instruction;
 output reg [2:0]  op;
-output reg [1:0]  prefix;
 output reg [3:0]  funct;
 output reg [5:0]  nalloc;
 output reg        endF;
@@ -26,7 +25,6 @@ always @(*) begin
     op = instruction [31:29];
 
     //Default values for outputs
-    prefix = 2'b00;
     funct = 4'b0000;
     immab = 1'b0;
     immlo = 6'b000000;
@@ -68,13 +66,11 @@ always @(*) begin
                 tt3 = instruction [7:6];
                 ta4 = instruction [13:8];
                 tt4 = instruction [15:14];
-                prefix = 2'b01;
             end
 
         3'b100: // Case I prefix
             begin
                 immhi = instruction [25:0];
-                prefix = 2'b10;
             end
 
         3'b101: // Case fragment end/start

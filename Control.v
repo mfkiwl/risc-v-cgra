@@ -8,7 +8,6 @@ input        clk,
 // Input from ALU result and instruction decoder
 input        ALU0,
 input [2:0]  op,
-input [1:0]  prefix,
 input [3:0]  funct,
 input [5:0]  nalloc,
 input        endF,
@@ -119,57 +118,57 @@ begin
             2'b00: //Did not come with a prefix
             begin
                 immvalue <= {26'b0,immlo};
-                Aenable = 1;
-                Benable = 1;
+                Aenable <= 1;
+                Benable <= 1;
                 // ta3 and ta4 are not defined
-                ta3_o = 0;
-                ta4_o = 0;
+                ta3_o <= 0;
+                ta4_o <= 0;
 
-                Aval = (immab == 1'b1) ? 32'b0 : immvalue;
-                Bval = (immab == 1'b1) ? immvalue : 32'b0;
+                Aval <= (immab == 1'b1) ? 32'b0 : immvalue;
+                Bval <= (immab == 1'b1) ? immvalue : 32'b0;
             end
 
             2'b10: //Comes with prefix I 
             begin
-                immvalue = {immhi,immlo};
-                Aenable = 1;
-                Benable = 1;
+                immvalue <= {immhi,immlo};
+                Aenable <= 1;
+                Benable <= 1;
                 // ta3 and ta4 are not defined
-                ta3_o = 0;
-                ta4_o = 0;
+                ta3_o <= 0;
+                ta4_o <= 0;
 
-                Aval = (immab == 1'b1) ? 32'b0 : immvalue;
-                Bval = (immab == 1'b1) ? immvalue : 32'b0;
+                Aval <= (immab == 1'b1) ? 32'b0 : immvalue;
+                Bval <= (immab == 1'b1) ? immvalue : 32'b0;
             end
 
             2'b01: // Comes with T prefix
             begin
             // The result of this instruction will be sent to ta3 and ta4 as well with tt3 and tt4 (write opA or write opB)
-                ta3_o = ta3_i;
-                ta4_o = ta4_i;
-                tt3_o = tt3_i;
-                tt4_o = tt4_i;
+                ta3_o <= ta3_i;
+                ta4_o <= ta4_i;
+                tt3_o <= tt3_i;
+                tt4_o <= tt4_i;
             end
 
             default:
             begin
-                Aval = 32'bx; 
-                Bval = 32'bx;
+                Aval <= 32'bx; 
+                Bval <= 32'bx;
             end 
         endcase
 
-        tempValA = Aval;
-        tempValB = Bval;
+        tempValA <= Aval;
+        tempValB <= Bval;
 
-        Aval = (tt1_ctrl == 2'b10) ? result_1 : ((tt2_ctrl == 2'b10) ? result_2 : tempValA);
-        Bval = (tt1_ctrl == 2'b11) ? result_1 : ((tt2_ctrl == 2'b11) ? result_2 : tempValB);
+        Aval <= (tt1_ctrl == 2'b10) ? result_1 : ((tt2_ctrl == 2'b10) ? result_2 : tempValA);
+        Bval <= (tt1_ctrl == 2'b11) ? result_1 : ((tt2_ctrl == 2'b11) ? result_2 : tempValB);
 
         // Determine if previous results need to be written to opA or opB based on the target type being sent from previous operation
         //case(tt1_ctrl)
         //    2'b10: // Write opA with result 1
-        //        Aval = result_1;
+        //        Aval <= result_1;
         //    2'b11: // Write opB with result 1
-        //        Bval = result_1;
+        //        Bval <= result_1;
         //endcase
 
         //case(tt2_ctrl)
@@ -182,25 +181,25 @@ begin
         // Now that input values to the ALU are defined, perform operation
         case(funct)
             4'b0000: // OR function
-                ALUsel = 4'b1001;
+                ALUsel <= 4'b1001;
             4'b0001: // AND function
-                ALUsel =  4'b1000;
+                ALUsel <=  4'b1000;
             4'b0010: // XOR function
-                ALUsel = 4'b1010;
+                ALUsel <= 4'b1010;
             4'b0011: // Addition
-                ALUsel = 4'b0000;
+                ALUsel <= 4'b0000;
             4'b0100: // Substraction
-                ALUsel = 4'b0001;
+                ALUsel <= 4'b0001;
             4'b0101: // set if less than function
-                ALUsel = 4'b1111;
+                ALUsel <= 4'b1111;
             4'b0110: // sltu function
-                ALUsel = 4'b1101;
+                ALUsel <= 4'b1101;
             4'b0111: // shift left sll
-                ALUsel = 4'b0100;
+                ALUsel <= 4'b0100;
             4'b1000: // shift right srl
-                ALUsel = 4'b0101;
+                ALUsel <= 4'b0101;
             4'b1001: // shift right arithmetic
-                ALUsel = 4'b1111;
+                ALUsel <= 4'b1111;
         endcase
 
         Osel = 2'b10; //Select ALU result as output
@@ -211,13 +210,13 @@ begin
             begin
                 if (ALU0 == 0)
                     begin
-                        ta1_o = ta1;
-                        branch = 1;
-                        icounter_o = ta1; //Check
+                        ta1_o <= ta1;
+                        branch <= 1;
+                        icounter_o <= ta1; //Check
                     end
                 else
                     begin
-                        branch = 0;
+                        branch <= 0;
                     end    
                 // else do nothing as the branch condition was not met 
             end
@@ -225,48 +224,48 @@ begin
             begin
                 if (ALU0 != 0)
                     begin
-                        ta1_o = ta1;
-                        branch = 1;
-                        icounter_o = ta1;
+                        ta1_o <= ta1;
+                        branch <= 1;
+                        icounter_o <= ta1;
                     end
                 else
                     begin
-                        branch = 0;
+                        branch <= 0;
                     end 
                 // else do nothing as the branch condition was not met 
             end
             2'b10: // Signal to write opA on ta1
             begin
-                ta1_o = ta1;
-                tt1_o = tt1;
+                ta1_o <= ta1;
+                tt1_o <= tt1;
             end
             2'b11: // Signal to wtite opB on ta1
             begin
-                ta1_o = ta1;
-                tt1_o = tt1;
+                ta1_o <= ta1;
+                tt1_o <= tt1;
             end
         endcase
 
         case(tt2) // Check if not 0 to send the signals to the bus
             2'b00: //Invalid
             begin
-                ta2_o = 0;
-                tt2_o = 0;
+                ta2_o <= 0;
+                tt2_o <= 0;
             end
             2'b01:
             begin
-                ta2_o = 0;
-                tt2_o = 0;
+                ta2_o <= 0;
+                tt2_o <= 0;
             end
             2'b10: // Defined to write opA or write opB on ta
             begin
-                ta2_o = ta2;
-                tt2_o = tt2;
+                ta2_o <= ta2;
+                tt2_o <= tt2;
             end
-            2'b01: 
+            2'b11: 
             begin
-                ta2_o = ta2;
-                tt2_o = tt2;
+                ta2_o <= ta2;
+                tt2_o <= tt2;
             end
         endcase
 
@@ -274,56 +273,56 @@ begin
         case(tt3_i) // Check if not 0 to send the signals to the bus
             2'b00: //Invalid
             begin
-                ta3_o = 0;
-                tt3_o = 0;
+                ta3_o <= 0;
+                tt3_o <= 0;
             end
             2'b01:
             begin
-                ta3_o = 0;
-                tt3_o = 0;
+                ta3_o <= 0;
+                tt3_o <= 0;
             end
             2'b10: // Defined to write opA or write opB on ta
             begin
-                ta3_o = ta3_i;
-                tt3_o = tt3_i;
+                ta3_o <= ta3_i;
+                tt3_o <= tt3_i;
             end
             2'b01: 
             begin
-                ta3_o = ta3_i;
-                tt3_o = tt3_i;
+                ta3_o <= ta3_i;
+                tt3_o <= tt3_i;
             end
             default: // if signal was not defined since there was no prefix
             begin
-                ta3_o = 0;
-                tt3_o = 0;
+                ta3_o <= 0;
+                tt3_o <= 0;
             end
         endcase
 
         case(tt4_i) // Check if not 0 to send the signals to the bus
             2'b00: //Invalid
             begin
-                ta4_o = 0;
-                tt4_o = 0;
+                ta4_o <= 0;
+                tt4_o <= 0;
             end
             2'b01:
             begin
-                ta4_o = 0;
-                tt4_o = 0;
+                ta4_o <= 0;
+                tt4_o <= 0;
             end
             2'b10: // Defined to write opA or write opB on ta
             begin
-                ta4_o = ta4_i;
-                tt4_o = tt4_i;
+                ta4_o <= ta4_i;
+                tt4_o <= tt4_i;
             end
             2'b01: 
             begin
-                ta4_o = ta4_i;
-                tt4_o = tt4_i;
+                ta4_o <= ta4_i;
+                tt4_o <= tt4_i;
             end
             default: 
             begin
-                ta4_o = 0;
-                tt4_o = 0;
+                ta4_o <= 0;
+                tt4_o <= 0;
             end            
         endcase
     end
