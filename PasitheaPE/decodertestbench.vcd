@@ -1,0 +1,91 @@
+$date
+	Mon Sep 30 20:25:21 2024
+$end
+$version
+	Icarus Verilog
+$end
+$timescale
+	1ps
+$end
+$scope module tb_decoder $end
+$var wire 2 ! tt4 [1:0] $end
+$var wire 2 " tt3 [1:0] $end
+$var wire 2 # tt2 [1:0] $end
+$var wire 2 $ tt1 [1:0] $end
+$var wire 6 % ta4 [5:0] $end
+$var wire 6 & ta3 [5:0] $end
+$var wire 6 ' ta2 [5:0] $end
+$var wire 6 ( ta1 [5:0] $end
+$var wire 2 ) prefix [1:0] $end
+$var wire 3 * op [2:0] $end
+$var wire 10 + offset [9:0] $end
+$var wire 7 , nalloc [6:0] $end
+$var wire 6 - immlo [5:0] $end
+$var wire 26 . immhi [25:0] $end
+$var wire 1 / immab $end
+$var wire 4 0 funct [3:0] $end
+$var wire 1 1 endF $end
+$var reg 32 2 instruction [31:0] $end
+$scope module uut $end
+$var wire 32 3 instruction [31:0] $end
+$var reg 1 1 endF $end
+$var reg 4 4 funct [3:0] $end
+$var reg 1 / immab $end
+$var reg 26 5 immhi [25:0] $end
+$var reg 6 6 immlo [5:0] $end
+$var reg 7 7 nalloc [6:0] $end
+$var reg 10 8 offset [9:0] $end
+$var reg 3 9 op [2:0] $end
+$var reg 2 : prefix [1:0] $end
+$var reg 6 ; ta1 [5:0] $end
+$var reg 6 < ta2 [5:0] $end
+$var reg 6 = ta3 [5:0] $end
+$var reg 6 > ta4 [5:0] $end
+$var reg 2 ? tt1 [1:0] $end
+$var reg 2 @ tt2 [1:0] $end
+$var reg 2 A tt3 [1:0] $end
+$var reg 2 B tt4 [1:0] $end
+$upscope $end
+$upscope $end
+$enddefinitions $end
+$comment Show the parameter values. $end
+$dumpall
+$end
+#0
+$dumpvars
+b10 B
+b10 A
+b10 @
+b11 ?
+b0 >
+b0 =
+b10101 <
+b111 ;
+b0 :
+b1 9
+bx 8
+b0 7
+b110011 6
+b0 5
+b101 4
+b101011110011001001010111000111 3
+b101011110011001001010111000111 2
+01
+b101 0
+1/
+b0 .
+b110011 -
+b0 ,
+bx +
+b1 *
+b0 )
+b111 (
+b10101 '
+b0 &
+b0 %
+b11 $
+b10 #
+b10 "
+b10 !
+$end
+#10000

@@ -1,0 +1,187 @@
+$date
+	Sat Feb  1 13:40:03 2025
+$end
+$version
+	Icarus Verilog
+$end
+$timescale
+	1ps
+$end
+$scope module tb_decoder $end
+$var wire 5 ! rs2 [4:0] $end
+$var wire 5 " rs1 [4:0] $end
+$var wire 5 # rd [4:0] $end
+$var wire 7 $ op [6:0] $end
+$var wire 20 % immhi [19:0] $end
+$var wire 12 & imm12 [11:0] $end
+$var wire 7 ' funct7 [6:0] $end
+$var wire 3 ( funct3 [2:0] $end
+$var wire 2 ) funct2 [1:0] $end
+$var wire 5 * fs3 [4:0] $end
+$var wire 5 + fs2 [4:0] $end
+$var wire 5 , fs1 [4:0] $end
+$var wire 5 - fd [4:0] $end
+$var reg 32 . instruction [31:0] $end
+$scope module uut $end
+$var wire 32 / instruction [31:0] $end
+$var reg 5 0 fd [4:0] $end
+$var reg 5 1 fs1 [4:0] $end
+$var reg 5 2 fs2 [4:0] $end
+$var reg 5 3 fs3 [4:0] $end
+$var reg 2 4 funct2 [1:0] $end
+$var reg 3 5 funct3 [2:0] $end
+$var reg 7 6 funct7 [6:0] $end
+$var reg 12 7 imm12 [11:0] $end
+$var reg 20 8 immhi [19:0] $end
+$var reg 7 9 op [6:0] $end
+$var reg 5 : rd [4:0] $end
+$var reg 5 ; rs1 [4:0] $end
+$var reg 5 < rs2 [4:0] $end
+$upscope $end
+$upscope $end
+$enddefinitions $end
+$comment Show the parameter values. $end
+$dumpall
+$end
+#0
+$dumpvars
+b10 <
+b11 ;
+b1 :
+b110011 9
+b0 8
+b0 7
+b0 6
+b100 5
+b0 4
+b0 3
+b0 2
+b0 1
+b0 0
+b1000011100000010110011 /
+b1000011100000010110011 .
+b0 -
+b0 ,
+b0 +
+b0 *
+b0 )
+b100 (
+b0 '
+b0 &
+b0 %
+b110011 $
+b1 #
+b11 "
+b10 !
+$end
+#10000
+b10000011 %
+b10000011 8
+b1 #
+b1 :
+b0 !
+b0 <
+b0 "
+b0 ;
+b0 (
+b0 5
+b1101111 $
+b1101111 9
+b10000011000011101111 .
+b10000011000011101111 /
+#20000
+b10 !
+b10 <
+b11 "
+b11 ;
+b100001 &
+b100001 7
+b1 (
+b1 5
+b0 %
+b0 8
+b0 #
+b0 :
+b100011 $
+b100011 9
+b10001000011001000010100011 .
+b10001000011001000010100011 /
+#30000
+b100000001 &
+b100000001 7
+b10 !
+b10 <
+b11 "
+b11 ;
+b100 (
+b100 5
+b1100011 $
+b1100011 9
+b10000001000011100000011100011 .
+b10000001000011100000011100011 /
+#40000
+b1 #
+b1 :
+b1000 &
+b1000 7
+b0 !
+b0 <
+b11 "
+b11 ;
+b0 (
+b0 5
+b1100111 $
+b1100111 9
+b100000011000000011100111 .
+b100000011000000011100111 /
+#50000
+b1 (
+b1 5
+b1000 &
+b1000 7
+b1 #
+b1 :
+b11 "
+b11 ;
+b11 $
+b11 9
+b100000011001000010000011 .
+b100000011001000010000011 /
+#60000
+b1000 &
+b1000 7
+b1 #
+b1 :
+b11 "
+b11 ;
+b10 (
+b10 5
+b10011 $
+b10011 9
+b100000011010000010010011 .
+b100000011010000010010011 /
+#70000
+b100000011010 %
+b100000011010 8
+b0 &
+b0 7
+b1 #
+b1 :
+b0 "
+b0 ;
+b0 (
+b0 5
+b10111 $
+b10111 9
+b100000011010000010010111 .
+b100000011010000010010111 /
+#80000
+b100000011010 %
+b100000011010 8
+b1 #
+b1 :
+b110111 $
+b110111 9
+b100000011010000010110111 .
+b100000011010000010110111 /
+#90000

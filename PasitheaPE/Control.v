@@ -65,11 +65,9 @@ output reg [5:0]  ta3_o,
 output reg [5:0]  ta4_o,
 output reg        branch, // signal that defines that a branch is performed to instruction with ta1
 output reg        oTerm, // signal to terminate current FI
-output reg        reset,
+
 
 output reg [31:0] messReg, // Result being sent to the bus
-
-//Register input values
 output reg [31:0] Aval,
 output reg [31:0] Bval,
 
