@@ -7,7 +7,7 @@ input      [31:0] in_2;
 input             sel;
 output reg    [31:0] data_out;
 
-always @(*) begin
+always @(posedge clk) begin
         data_out = sel ? in_2 : in_1; 
     end
 
