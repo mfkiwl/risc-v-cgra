@@ -91,69 +91,74 @@ begin
     case(op)
     7'b0000011: // Op code 3 is load operations
     begin
-        Asel <= 2'b00; // Select rs1 as A input
-        if (imm12[11]==0)
+        rs1Out <= rs1;
+        if (dataReady)
         begin
-            tempimmvalue = {20'b00000000000000000000, imm12};
-        end
-        else
-        begin
-            tempimmvalue = {20'b11111111111111111111, imm12};
-        end
-        immvalue <= tempimmvalue;
-        Bsel <= 2'b10; //Select immidiate value as B input
-        // Enable registers to load value
-        Aenable <= 1; 
-        Benable <= 1;
+            Asel <= 2'b01; // Select data from bus as A input
+            if (imm12[11]==0)
+            begin
+                tempimmvalue = {20'b00000000000000000000, imm12};
+            end
+            else
+            begin
+                tempimmvalue = {20'b11111111111111111111, imm12};
+            end
+            immvalue <= tempimmvalue;
+            Bsel <= 2'b10; //Select immidiate value as B input
 
-        //Select ALU to add values
-        ALUsel <= 5'b00000;
+            // Enable registers to load value
+            Aenable <= 1; 
+            Benable <= 1;
 
-        //Select ALU result as output to send address
-        Osel <= 2'b00; 
+            //Select ALU to add values
+            ALUsel <= 5'b00000;
 
-        if (ALUcomplete)
-        begin
-            mem_read <= 1; //Send signal for memory read
-            Aenable <= 0;
-            Benable <= 0;
-        end
+            //Select ALU result as output to send address
+            Osel <= 2'b00; 
 
-        if (mem_ack) //After acknowledge signal has been received
-        begin
-            Aenable <= 1;
-            Asel <= 01; //Select data from bus as A input
-            case (funct3)
-            3'b000: // Load byte sign extended
-                begin
-                ALUsel <= 5'b10000; // Select take byte sign extended from ALU
-                Osel <= 00; //Select output from ALU
-                end
-            3'b001: // Load half word sign extended
-                begin
-                ALUsel <= 5'b10001; // Select take half word sign extended from ALU
-                Osel <= 00; //Select output from ALU
-                end
-            3'b010: // Load word
-                begin
-                Osel <= 01; //Select register A as output
-                end
-            3'b100: // Load byte unsigned
-                begin
-                ALUsel <= 5'b10010; // Select take byte unsigned from ALU
-                Osel <= 00; // Select output from ALU
-                end
-            3'b101: // Load half word unsigned
-                begin
-                ALUsel <= 5'b10011; // Select take byte unsigned from ALU
-                Osel <= 00; // Select output from ALU
-                end
-            endcase
-            rdOut <= rd; 
-            rdWrite <= 1; //Send signal to write output value into rd register
-            mem_read <= 0; //Reset the memory read signal
-            PCout <= PCin + 1;
-        end
+            if (ALUcomplete)
+            begin
+                mem_read <= 1; //Send signal for memory read
+                Aenable <= 0;
+                Benable <= 0;
+            end
+
+            if (mem_ack) //After acknowledge signal has been received
+            begin
+                Aenable <= 1;
+                Asel <= 01; //Select data from bus as A input
+                case (funct3)
+                3'b000: // Load byte sign extended
+                    begin
+                    ALUsel <= 5'b10000; // Select take byte sign extended from ALU
+                    Osel <= 00; //Select output from ALU
+                    end
+                3'b001: // Load half word sign extended
+                    begin
+                    ALUsel <= 5'b10001; // Select take half word sign extended from ALU
+                    Osel <= 00; //Select output from ALU
+                    end
+                3'b010: // Load word
+                    begin
+                    Osel <= 01; //Select register A as output
+                    end
+                3'b100: // Load byte unsigned
+                    begin
+                    ALUsel <= 5'b10010; // Select take byte unsigned from ALU
+                    Osel <= 00; // Select output from ALU
+                    end
+                3'b101: // Load half word unsigned
+                    begin
+                    ALUsel <= 5'b10011; // Select take byte unsigned from ALU
+                    Osel <= 00; // Select output from ALU
+                    end
+                endcase
+                rdOut <= rd; 
+                rdWrite <= 1; //Send signal to write output value into rd register
+                mem_read <= 0; //Reset the memory read signal
+                PCout <= PCin + 1;
+            end
+        end           
     end
 
     7'b0010011: //Op code 19 is ALU operations on immidiate values
