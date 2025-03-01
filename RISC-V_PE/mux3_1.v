@@ -6,7 +6,7 @@ module mux3_1 (
     output reg [31:0] data_out
 );
 
-    always @(posedge clk) begin
+    always @(*) begin
         case(sel)
             2'b00: data_out = in_1; // Select in_1
             2'b01: data_out = in_2; // Select in_2

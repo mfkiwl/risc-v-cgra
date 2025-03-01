@@ -17,6 +17,7 @@ input [4:0]  rd,
 input [11:0] imm12,
 input [19:0] immhi,
 input        ALUcomplete, //Indicates end of ALUoperation
+input [31:0] ALURes, //ALU Result input to controller
 
 // Control signal inputs/outputs from bus
 input  [31:0] PCin, //Program counter input
@@ -32,7 +33,6 @@ input  [31:0] result_2,
 
 // Signals for memory access operations
 input        mem_ack,
-input [31:0] mem_Message, //input received when load functions are called
 
 // Signals to bus with register addresses
 output reg [4:0] rs1Out,
@@ -60,7 +60,9 @@ output reg       Benable,
 
 // Output signals for read/write to memory
 output reg        mem_read, // If mem_read is 1, value from the output of the PE is a memory address that must be read
-output reg [31:0] mem_address, // might remove
+output reg        mem_write, //Indicates to bus that value in output must be written to indicated address
+output reg [31:0] mem_address, // used for store operations. Stores in memory
+output reg        reg_select, // Selects rs1 or rs2 when reading from registers
 
 output reg [31:0] immvalue //Value being wired to reg B mux
 );
@@ -70,6 +72,7 @@ reg [31:0] tempimmvalue = 0; //Fill with imm12 or immhi
 reg [31:0] tempVal = 0;
 reg [31:0] tempValA = 0; 
 reg [31:0] tempValB = 0;
+reg [31:0] tempAddress = 0; //For store operations
 
 always @(posedge clk) 
 begin
@@ -87,11 +90,16 @@ begin
     immvalue <= 0;
     rs1Out <= 0;
     rs2Out <= 0;
+    reg_select <= 0;
+    mem_write <= 0;
 
     case(op)
     7'b0000011: // Op code 3 is load operations
     begin
         rs1Out <= rs1;
+        reg_select <= 0; //Selects rs1 value to pull
+        Aenable <= 0;
+        Benable <= 0;
         if (dataReady)
         begin
             Asel <= 2'b01; // Select data from bus as A input
@@ -542,6 +550,71 @@ begin
             rdWrite <= 1; //Send signal to write output value into rd register
             mem_read <= 0; //Reset the memory read signal
             PCout <= PCin + 1;
+        end
+    end
+
+    7'b0100011: //Code 35 is store operations
+    begin
+        rs1Out <= rs1;
+        reg_select <= 0; //Selects data from rs1 to pull 
+        Aenable <= 0;
+        Benable <= 0;
+        if (dataReady)
+        begin
+            Asel = 2'b01; //Select data from bus
+            if (imm12[11]==0)
+            begin
+                tempimmvalue = {20'b00000000000000000000, imm12};
+            end
+            else
+            begin
+                tempimmvalue = {20'b11111111111111111111, imm12};
+            end
+            immvalue <= tempimmvalue;
+            Bsel <= 2'b10; //Select immidiate value as B input
+
+            // Enable registers to load value
+            Aenable <= 1; 
+            Benable <= 1;
+
+            //Select ALU to add values
+            ALUsel <= 5'b00000;
+
+            if (ALUcomplete)
+            begin
+                tempAddress <= ALURes;
+
+                rs2Out <= rs2;
+                reg_select <= 1; //Selects register rs2 to pull data from
+                if (dataReady)
+                begin
+                    Asel <= 2'b01; //Select data from bus
+                    case(funct3)
+                    3'b000: //Store byte
+                    begin
+                        ALUsel = 5'b10010; //Take only lower byte of rs2 value
+                        Osel = 2'b00; //Select output from ALU
+                    end 
+
+                    3'b001: //Store half word
+                    begin
+                        ALUsel = 5'b10011; //Take lower half word of rs2 value
+                        Osel = 2'b00; //Select output from ALU
+                    end
+                    
+                    3'b010: //Store word
+                    begin
+                        Osel = 2'b01; //Select reg A as output
+                    end
+                    endcase
+
+                    if (ALUcomplete)
+                    begin
+                        mem_address <= tempAddress; //Use the calculated destination address to store the value
+                        mem_write <= 1; //Indicates that value at output will be stored at mem_address
+                    end
+                end
+            end
         end
     end
 

@@ -20,9 +20,9 @@ reg ALUcomplete;
 reg [31:0] PCin;
 reg [31:0] result_1;
 reg [31:0] result_2;
-reg mem_ack;
-reg [31:0] mem_Message;
+reg        mem_ack;
 reg        dataReady;
+reg [31:0] ALURes;
 
 // Output signals
 wire [31:0] PCout;
@@ -38,7 +38,9 @@ wire [31:0] Bval;
 wire Aenable;
 wire Benable;
 wire mem_read;
+wire mem_write;
 wire [31:0] mem_address;
+wire reg_select;
 wire [31:0] immvalue;
 wire [4:0] rs1Out;
 wire [4:0] rs2Out;
@@ -62,7 +64,6 @@ controller uut (
     .result_1(result_1),
     .result_2(result_2),
     .mem_ack(mem_ack),
-    .mem_Message(mem_Message),
     .ALUsel(ALUsel),
     .Asel(Asel),
     .Bsel(Bsel),
@@ -75,11 +76,14 @@ controller uut (
     .Aenable(Aenable),
     .Benable(Benable),
     .mem_read(mem_read),
+    .mem_write(mem_write),
     .mem_address(mem_address),
+    .reg_select(reg_select),
     .immvalue(immvalue),
     .dataReady(dataReady),
     .rs1Out(rs1Out),
-    .rs2Out(rs2Out)
+    .rs2Out(rs2Out),
+    .ALURes(ALURes)
 );
 
 // Generate clock signal
@@ -109,7 +113,6 @@ initial begin
     result_1 = 32'b0;
     result_2 = 32'b0;
     mem_ack = 0;
-    mem_Message = 32'b0;
     ALUcomplete = 0;
     dataReady = 0;
 
@@ -165,7 +168,6 @@ initial begin
     result_1 = 32'b0;
     result_2 = 32'b0;
     mem_ack = 0;
-    mem_Message = 32'b0;
     ALUcomplete = 0;
     dataReady = 0;
 
@@ -198,7 +200,6 @@ initial begin
     result_1 = 32'b0;
     result_2 = 32'b0;
     mem_ack = 0;
-    mem_Message = 32'b0;
     ALUcomplete = 0;
     dataReady = 0;
     PCin = 1;
