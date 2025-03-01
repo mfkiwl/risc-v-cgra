@@ -1,10 +1,9 @@
 // Instruction decoder module
 
-module decoder (op, funct2, funct3, funct7, rs1, rs2, fs1, fs2, fs3, rd, fd, imm12, immhi, instruction);
+module decoder (op, funct3, funct7, rs1, rs2, fs1, fs2, fs3, rd, fd, imm12, immhi, instruction, decodeComplete);
 
 input  [31:0] instruction;
 output reg [6:0]  op;
-output reg [1:0]  funct2;
 output reg [2:0]  funct3;
 output reg [6:0]  funct7;
 output reg [4:0]  rs1; //index for register 1 or opperand 1
@@ -16,15 +15,16 @@ output reg [4:0]  rd;  //index for the destination register
 output reg [4:0]  fd; //for floating point opperations
 output reg [11:0] imm12; //immidiate value for I type, S type and B type instructions
 output reg [19:0] immhi; //immidiate value for U and J type instructions
+output reg        decodeComplete;
 
 
 
 always @(*) begin
+    op = 7'b0000000;
     // Extract opcode
     op = instruction [6:0];
 
     //Default values for outputs
-    funct2 = 2'b00;
     funct3 = 3'b000;
     funct7 = 7'b0000000;
     rs1 = 5'b00000;
@@ -36,6 +36,7 @@ always @(*) begin
     fd = 5'b00000;
     imm12 = 12'b000000000000;
     immhi = 20'b00000000000000000000;
+    decodeComplete <= 0;
     
 
     case (op)
@@ -73,7 +74,7 @@ always @(*) begin
                 funct3 = instruction[14:12];
                 rs1 = instruction[19:15];
                 rs2 = instruction[24:20];
-                imm12 = {instruction[31:25], instruction[11:7]};
+                imm12 = {instruction[31], instruction[7], instruction[30:25], instruction[11:8], 1'b0};
             end
 
         7'b0000011 , 7'b0010011 , 7'b1100111 , 7'b0000111: //Type I instruction
@@ -90,7 +91,7 @@ always @(*) begin
                 fd = instruction[11:7];
                 fs1 = instruction[19:15];
                 fs2 = instruction[24:20];
-                funct2 = instruction[26:25];
+                //funct2 = instruction[26:25];
                 fs3 = instruction[31:27];
             end
 
@@ -99,6 +100,11 @@ always @(*) begin
                 $display ("This code does not correspond to any valid operation");
             end
     endcase
+
+    if (op != 0)
+    begin
+        decodeComplete <= 1;
+    end
 
     end
 

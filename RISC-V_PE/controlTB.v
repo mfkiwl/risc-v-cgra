@@ -8,7 +8,6 @@ module test_controller;
 reg clk;
 reg ALU0;
 reg [6:0] op;
-reg [1:0] funct2;
 reg [2:0] funct3;
 reg [6:0] funct7;
 reg [4:0] rs1;
@@ -18,11 +17,10 @@ reg [11:0] imm12;
 reg [19:0] immhi;
 reg ALUcomplete;
 reg [31:0] PCin;
-reg [31:0] result_1;
-reg [31:0] result_2;
 reg        mem_ack;
 reg        dataReady;
 reg [31:0] ALURes;
+reg        decodeComplete;
 
 // Output signals
 wire [31:0] PCout;
@@ -32,11 +30,10 @@ wire [1:0] Bsel;
 wire [1:0] Osel;
 wire [4:0] rdOut;
 wire rdWrite;
-wire [31:0] messReg;
-wire [31:0] Aval;
-wire [31:0] Bval;
 wire Aenable;
 wire Benable;
+wire IRenable;
+wire reg_reset;
 wire mem_read;
 wire mem_write;
 wire [31:0] mem_address;
@@ -50,7 +47,6 @@ controller uut (
     .clk(clk),
     .ALU0(ALU0),
     .op(op),
-    .funct2(funct2),
     .funct3(funct3),
     .funct7(funct7),
     .rs1(rs1),
@@ -61,8 +57,6 @@ controller uut (
     .ALUcomplete(ALUcomplete),
     .PCin(PCin),
     .PCout(PCout),
-    .result_1(result_1),
-    .result_2(result_2),
     .mem_ack(mem_ack),
     .ALUsel(ALUsel),
     .Asel(Asel),
@@ -70,11 +64,9 @@ controller uut (
     .Osel(Osel),
     .rdOut(rdOut),
     .rdWrite(rdWrite),
-    .messReg(messReg),
-    .Aval(Aval),
-    .Bval(Bval),
     .Aenable(Aenable),
     .Benable(Benable),
+    .reg_reset(reg_reset),
     .mem_read(mem_read),
     .mem_write(mem_write),
     .mem_address(mem_address),
@@ -83,7 +75,9 @@ controller uut (
     .dataReady(dataReady),
     .rs1Out(rs1Out),
     .rs2Out(rs2Out),
-    .ALURes(ALURes)
+    .ALURes(ALURes),
+    .IRenable(IRenable),
+    .decodeComplete(decodeComplete)
 );
 
 // Generate clock signal
@@ -99,9 +93,9 @@ initial begin
                  $time, PCout, ALUsel, Asel, Osel, rdOut, Aenable, Benable, mem_read, immvalue);
 
     // Initialize inputs
+
     ALU0 = 0;
     op = 7'b0000000;
-    funct2 = 2'b00;
     funct3 = 3'b000;
     funct7 = 7'b0000000;
     rs1 = 5'b00000;
@@ -110,8 +104,6 @@ initial begin
     imm12 = 12'b000000000000;
     immhi = 20'b00000000000000000000;
     PCin = 32'b0;
-    result_1 = 32'b0;
-    result_2 = 32'b0;
     mem_ack = 0;
     ALUcomplete = 0;
     dataReady = 0;
@@ -157,7 +149,6 @@ initial begin
     // Add immidiate case
     ALU0 = 0;
     op = 7'b0000000;
-    funct2 = 2'b00;
     funct3 = 3'b000;
     funct7 = 7'b0000000;
     rs1 = 5'b00000;
@@ -165,8 +156,6 @@ initial begin
     rd = 5'b00000;
     imm12 = 12'b000000000000;
     immhi = 20'b00000000000000000000;
-    result_1 = 32'b0;
-    result_2 = 32'b0;
     mem_ack = 0;
     ALUcomplete = 0;
     dataReady = 0;
@@ -189,7 +178,6 @@ initial begin
     //Shift left
     ALU0 = 0;
     op = 7'b0000000;
-    funct2 = 2'b00;
     funct3 = 3'b000;
     funct7 = 7'b0000000;
     rs1 = 5'b00000;
@@ -197,8 +185,6 @@ initial begin
     rd = 5'b00000;
     imm12 = 12'b000000000000;
     immhi = 20'b00000000000000000000;
-    result_1 = 32'b0;
-    result_2 = 32'b0;
     mem_ack = 0;
     ALUcomplete = 0;
     dataReady = 0;

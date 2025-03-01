@@ -18,6 +18,7 @@ input [11:0] imm12,
 input [19:0] immhi,
 input        ALUcomplete, //Indicates end of ALUoperation
 input [31:0] ALURes, //ALU Result input to controller
+input        decodeComplete, //Signal from decoder that signals are ready
 
 // Control signal inputs/outputs from bus
 input  [31:0] PCin, //Program counter input
@@ -49,14 +50,11 @@ output reg rdWrite, //Indicates that output will be written to rd
 
 output reg [31:0] messReg, // Result being sent to the bus. Might remove
 
-//Register input values
-// Might remove. Find how to wire the proper values
-output reg [31:0] Aval,
-output reg [31:0] Bval,
-
 // Register enable signals
 output reg       Aenable,
 output reg       Benable,
+output reg       IRenable,
+output reg       reg_reset, //Reset signal for registers
 
 // Output signals for read/write to memory
 output reg        mem_read, // If mem_read is 1, value from the output of the PE is a memory address that must be read
@@ -69,9 +67,6 @@ output reg [31:0] immvalue //Value being wired to reg B mux
 
 // Internal signals
 reg [31:0] tempimmvalue = 0; //Fill with imm12 or immhi
-reg [31:0] tempVal = 0;
-reg [31:0] tempValA = 0; 
-reg [31:0] tempValB = 0;
 reg [31:0] tempAddress = 0; //For store operations
 
 always @(posedge clk) 
@@ -86,12 +81,17 @@ begin
     rdWrite <= 0;
     Aenable <= 0;
     Benable <= 0;
+    reg_reset <= 1;
     mem_read <= 0;
     immvalue <= 0;
     rs1Out <= 0;
     rs2Out <= 0;
     reg_select <= 0;
     mem_write <= 0;
+    IRenable <= 1;
+
+    if (decodeComplete)
+    begin
 
     case(op)
     7'b0000011: // Op code 3 is load operations
@@ -100,6 +100,7 @@ begin
         reg_select <= 0; //Selects rs1 value to pull
         Aenable <= 0;
         Benable <= 0;
+        reg_reset <= 0;
         if (dataReady)
         begin
             Asel <= 2'b01; // Select data from bus as A input
@@ -172,6 +173,7 @@ begin
     7'b0010011: //Op code 19 is ALU operations on immidiate values
     begin
         rs1Out <= rs1;
+        reg_reset <= 0;
 
         if (dataReady)
         begin
@@ -354,6 +356,7 @@ begin
     begin
         rs1Out <= rs1;
         rs2Out <= rs2;
+        reg_reset <= 0;
 
         if (dataReady)
         begin
@@ -530,6 +533,7 @@ begin
 
     7'b0110111: //Code 55 is Load upper immidiate word
     begin
+        reg_reset <= 0;
         tempimmvalue = {immhi, 12'b000000000000};
         immvalue <= tempimmvalue;
         Bsel <= 2'b10; //Select immidiate value as B input
@@ -555,6 +559,7 @@ begin
 
     7'b0100011: //Code 35 is store operations
     begin
+        reg_reset <= 0;
         rs1Out <= rs1;
         reg_select <= 0; //Selects data from rs1 to pull 
         Aenable <= 0;
@@ -612,6 +617,7 @@ begin
                     begin
                         mem_address <= tempAddress; //Use the calculated destination address to store the value
                         mem_write <= 1; //Indicates that value at output will be stored at mem_address
+                        PCout <= PCin + 1;
                     end
                 end
             end
@@ -619,6 +625,8 @@ begin
     end
 
     endcase
+    IRenable <= 0;
+    end
 end
 
 endmodule
