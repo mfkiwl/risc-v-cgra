@@ -22,12 +22,13 @@ reg [31:0] result_1;
 reg [31:0] result_2;
 reg mem_ack;
 reg [31:0] mem_Message;
+reg        dataReady;
 
 // Output signals
 wire [31:0] PCout;
 wire [4:0] ALUsel;
 wire [1:0] Asel;
-wire Bsel;
+wire [1:0] Bsel;
 wire [1:0] Osel;
 wire [4:0] rdOut;
 wire rdWrite;
@@ -39,6 +40,8 @@ wire Benable;
 wire mem_read;
 wire [31:0] mem_address;
 wire [31:0] immvalue;
+wire [4:0] rs1Out;
+wire [4:0] rs2Out;
 
 // Instantiate the controller module
 controller uut (
@@ -73,7 +76,10 @@ controller uut (
     .Benable(Benable),
     .mem_read(mem_read),
     .mem_address(mem_address),
-    .immvalue(immvalue)
+    .immvalue(immvalue),
+    .dataReady(dataReady),
+    .rs1Out(rs1Out),
+    .rs2Out(rs2Out)
 );
 
 // Generate clock signal
@@ -85,8 +91,8 @@ end
 // Initialize and apply test vectors
 initial begin
     // Monitor outputs
-        $monitor("Time: %0dns | PCout: %b | ALUsel: %b | Asel: %b | Bsel: %b | Osel: %b | rdOut: %b | rdWrite: %b | Aenable: %b | Benable: %b | mem_read: %b | immvalue: %b | ALUcomplete: %b", 
-                 $time, PCout, ALUsel, Asel, Bsel, Osel, rdOut, rdWrite, Aenable, Benable, mem_read, immvalue, ALUcomplete);
+        $monitor("Time: %0dns | PCout: %b | ALUsel: %b | Asel: %b | Osel: %b | rdOut: %b | Aenable: %b | Benable: %b | immvalue: %b", 
+                 $time, PCout, ALUsel, Asel, Osel, rdOut, Aenable, Benable, mem_read, immvalue);
 
     // Initialize inputs
     ALU0 = 0;
@@ -104,7 +110,10 @@ initial begin
     result_2 = 32'b0;
     mem_ack = 0;
     mem_Message = 32'b0;
+    ALUcomplete = 0;
+    dataReady = 0;
 
+    /*
     // Apply a test case
     op = 7'b0000011; // Load operation
     funct3 = 3'b000; // Load byte sign extended
@@ -140,6 +149,74 @@ initial begin
     ALUcomplete = 0;
     mem_ack = 0;
     #10
+    */
+
+    // Add immidiate case
+    ALU0 = 0;
+    op = 7'b0000000;
+    funct2 = 2'b00;
+    funct3 = 3'b000;
+    funct7 = 7'b0000000;
+    rs1 = 5'b00000;
+    rs2 = 5'b00000;
+    rd = 5'b00000;
+    imm12 = 12'b000000000000;
+    immhi = 20'b00000000000000000000;
+    result_1 = 32'b0;
+    result_2 = 32'b0;
+    mem_ack = 0;
+    mem_Message = 32'b0;
+    ALUcomplete = 0;
+    dataReady = 0;
+
+    #5
+    op = 7'b0010011;
+
+    rs1 = 5'b00010;
+    imm12 = 12'b000000000110;
+    rd = 5'b00010;
+    funct3 = 3'b000;
+
+    #5
+    dataReady = 1;
+
+    #5
+    ALUcomplete = 1;
+    #5
+
+    //Shift left
+    ALU0 = 0;
+    op = 7'b0000000;
+    funct2 = 2'b00;
+    funct3 = 3'b000;
+    funct7 = 7'b0000000;
+    rs1 = 5'b00000;
+    rs2 = 5'b00000;
+    rd = 5'b00000;
+    imm12 = 12'b000000000000;
+    immhi = 20'b00000000000000000000;
+    result_1 = 32'b0;
+    result_2 = 32'b0;
+    mem_ack = 0;
+    mem_Message = 32'b0;
+    ALUcomplete = 0;
+    dataReady = 0;
+    PCin = 1;
+
+    #5
+    op = 7'b0010011;
+    rs1 = 5'b00010;
+    imm12 = 12'b000000000110;
+    rd = 5'b00010;
+    funct3 = 3'b001;
+
+    #5
+    dataReady = 1;
+
+    #5
+    ALUcomplete = 1;
+    
+
 
     // End the simulation
     $finish;

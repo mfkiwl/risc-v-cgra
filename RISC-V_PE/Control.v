@@ -22,6 +22,9 @@ input        ALUcomplete, //Indicates end of ALUoperation
 input  [31:0] PCin, //Program counter input
 output reg [31:0] PCout, //Program counter output
 
+// Input from bus when data from register is ready
+input       dataReady,
+
 // Results from previous operations to be used in opA and opB
 // Might remove, using RISC-V registers as inputs for operands
 input  [31:0] result_1,
@@ -31,10 +34,14 @@ input  [31:0] result_2,
 input        mem_ack,
 input [31:0] mem_Message, //input received when load functions are called
 
+// Signals to bus with register addresses
+output reg [4:0] rs1Out,
+output reg [4:0] rs2Out,
+
 // Selection signal outputs for the 3 MUX and the ALU
 output reg [4:0] ALUsel,
 output reg [1:0] Asel, //Can be rs1 from decoder, dataInput from bus or PC from bus
-output reg       Bsel, //Can be rs2 from decoder or immvalue from controller
+output reg [1:0] Bsel, //Can be rs2 from decoder, dataInput from bus or immvalue from controller
 output reg [1:0] Osel, //Can be ALU result, opA register, or opB register
 
 output reg [4:0] rdOut, // This is the address of the destination register
@@ -78,12 +85,13 @@ begin
     Benable <= 0;
     mem_read <= 0;
     immvalue <= 0;
-
+    rs1Out <= 0;
+    rs2Out <= 0;
 
     case(op)
     7'b0000011: // Op code 3 is load operations
     begin
-        Asel <= 00; // Select rs1 as A input
+        Asel <= 2'b00; // Select rs1 as A input
         if (imm12[11]==0)
         begin
             tempimmvalue = {20'b00000000000000000000, imm12};
@@ -93,7 +101,7 @@ begin
             tempimmvalue = {20'b11111111111111111111, imm12};
         end
         immvalue <= tempimmvalue;
-        Bsel <= 1; //Select immidiate value as B input
+        Bsel <= 2'b10; //Select immidiate value as B input
         // Enable registers to load value
         Aenable <= 1; 
         Benable <= 1;
@@ -102,7 +110,7 @@ begin
         ALUsel <= 5'b00000;
 
         //Select ALU result as output to send address
-        Osel <= 00; 
+        Osel <= 2'b00; 
 
         if (ALUcomplete)
         begin
@@ -128,7 +136,6 @@ begin
                 end
             3'b010: // Load word
                 begin
-                ALUsel <= 5'b10000; // Select take byte sign extended from ALU
                 Osel <= 01; //Select register A as output
                 end
             3'b100: // Load byte unsigned
@@ -148,6 +155,391 @@ begin
             PCout <= PCin + 1;
         end
     end
+
+    7'b0010011: //Op code 19 is ALU operations on immidiate values
+    begin
+        rs1Out <= rs1;
+
+        if (dataReady)
+        begin
+            Asel <= 2'b01; //Select data comming from bus
+            if (imm12[11]==0)
+            begin
+                tempimmvalue = {20'b00000000000000000000, imm12};
+            end
+            else
+            begin
+                tempimmvalue = {20'b11111111111111111111, imm12};
+            end
+            immvalue <= tempimmvalue;
+            Bsel <= 2'b10; //Select immidiate value as B input
+            // Enable registers to load value
+            Aenable <= 1; 
+            Benable <= 1;
+
+            case(funct3)
+            3'b000: //Add immidiate
+            begin
+                //Select ALU to add values
+                ALUsel <= 5'b00000;
+
+                if (ALUcomplete)
+                begin
+                    Osel <= 2'b00;
+                    rdOut <= rd;
+                    rdWrite <= 1;
+                    PCout <= PCin + 1;
+                end
+            end
+
+            3'b001: //Shift left
+            begin
+                immvalue <= {27'b000000000000000000000000000, tempimmvalue[4:0]};
+                Bsel <= 2'b10;
+                // Enable registers to load value
+                Aenable <= 1; 
+                Benable <= 1;
+
+                ALUsel <= 5'b00100;
+
+                if (ALUcomplete)
+                begin
+                    Osel <= 2'b00;
+                    rdOut <= rd;
+                    rdWrite <= 1;
+                    PCout <= PCin + 1;
+                end
+            end
+
+            3'b010: //Set less than Immediate
+            begin
+                immvalue <= tempimmvalue;
+                Bsel <= 2'b10;
+                // Enable registers to load value
+                Aenable <= 1; 
+                Benable <= 1;
+
+                ALUsel <= 5'b01110;
+
+                if (ALUcomplete)
+                begin
+                    Osel <= 2'b00;
+                    rdOut <= rd;
+                    rdWrite <= 1;
+                    PCout <= PCin + 1;
+                end
+            end
+
+            3'b011: //Set less than unsigned
+            begin
+                immvalue <= tempimmvalue;
+                Bsel <= 2'b10;
+                // Enable registers to load value
+                Aenable <= 1; 
+                Benable <= 1;
+
+                ALUsel <= 5'b01101;
+
+                if (ALUcomplete)
+                begin
+                    Osel <= 2'b00;
+                    rdOut <= rd;
+                    rdWrite <= 1;
+                    PCout <= PCin + 1;
+                end
+            end
+
+            3'b100: //XOR
+            begin
+                immvalue <= tempimmvalue;
+                Bsel <= 2'b10;
+                // Enable registers to load value
+                Aenable <= 1; 
+                Benable <= 1;
+
+                ALUsel <= 5'b01010;
+
+                if (ALUcomplete)
+                begin
+                    Osel <= 2'b00;
+                    rdOut <= rd;
+                    rdWrite <= 1;
+                    PCout <= PCin + 1;
+                end
+            end
+
+            3'b101: //Shift right logical or arithmetic
+            begin
+                immvalue <= {27'b000000000000000000000000000, tempimmvalue[4:0]};
+                Bsel <= 2'b10;
+                // Enable registers to load value
+                Aenable <= 1; 
+                Benable <= 1;
+
+                case(tempimmvalue[11:5])
+                7'b0000000: //Logical shift right
+                begin
+                    ALUsel <= 5'b00101;
+                end
+                7'b0100000: //Arithmetic shift right
+                begin
+                    ALUsel <= 5'b01111;
+                end
+                endcase
+
+                if (ALUcomplete)
+                begin
+                    Osel <= 2'b00;
+                    rdOut <= rd;
+                    rdWrite <= 1;
+                    PCout <= PCin + 1;
+                end
+            end
+
+            3'b110: //OR
+            begin
+                immvalue <= tempimmvalue;
+                Bsel <= 2'b10;
+                // Enable registers to load value
+                Aenable <= 1; 
+                Benable <= 1;
+
+                ALUsel <= 5'b01011;
+
+                if (ALUcomplete)
+                begin
+                    Osel <= 2'b00;
+                    rdOut <= rd;
+                    rdWrite <= 1;
+                    PCout <= PCin + 1;
+                end
+            end
+
+            3'b111: //AND
+            begin
+                immvalue <= tempimmvalue;
+                Bsel <= 2'b10;
+                // Enable registers to load value
+                Aenable <= 1; 
+                Benable <= 1;
+
+                ALUsel <= 5'b01000;
+
+                if (ALUcomplete)
+                begin
+                    Osel <= 2'b00;
+                    rdOut <= rd;
+                    rdWrite <= 1;
+                    PCout <= PCin + 1;
+                end
+            end
+            endcase
+        end    
+    end
+
+    7'b0110011: //Code 51 is ALU operations on two values comming from registers
+    begin
+        rs1Out <= rs1;
+        rs2Out <= rs2;
+
+        if (dataReady)
+        begin
+            Asel <= 2'b01; //Select data comming from bus
+            Bsel <= 2'b01; //Select data comming from bus 
+            // Enable registers to load value
+            Aenable <= 1; 
+            Benable <= 1;
+
+            case(funct3)
+            3'b000: //Add and substract
+            begin
+                case (funct7)
+                7'b0000000: //Add
+                begin
+                    //Select ALU to add values
+                    ALUsel <= 5'b00000;
+
+                    if (ALUcomplete)
+                    begin
+                        Osel <= 2'b00;
+                        rdOut <= rd;
+                        rdWrite <= 1;
+                        PCout <= PCin + 1;
+                    end
+                end
+                7'b0100000: //Substract
+                begin
+                    //Select ALU to substract values
+                    ALUsel <= 5'b00001;
+
+                    if (ALUcomplete)
+                    begin
+                        Osel <= 2'b00;
+                        rdOut <= rd;
+                        rdWrite <= 1;
+                        PCout <= PCin + 1;
+                    end
+                end
+                endcase
+            end
+
+            3'b001: //Shift left logical
+            begin
+                // Enable registers to load value
+                Aenable <= 1; 
+                Benable <= 1;
+
+                ALUsel <= 5'b00100;
+
+                if (ALUcomplete)
+                begin
+                    Osel <= 2'b00;
+                    rdOut <= rd;
+                    rdWrite <= 1;
+                    PCout <= PCin + 1;
+                end
+            end
+
+            3'b010: //Set less than
+            begin
+                // Enable registers to load value
+                Aenable <= 1; 
+                Benable <= 1;
+
+                ALUsel <= 5'b01110;
+
+                if (ALUcomplete)
+                begin
+                    Osel <= 2'b00;
+                    rdOut <= rd;
+                    rdWrite <= 1;
+                    PCout <= PCin + 1;
+                end
+            end
+
+            3'b011: //Set less than unsigned
+            begin
+                // Enable registers to load value
+                Aenable <= 1; 
+                Benable <= 1;
+
+                ALUsel <= 5'b01101;
+
+                if (ALUcomplete)
+                begin
+                    Osel <= 2'b00;
+                    rdOut <= rd;
+                    rdWrite <= 1;
+                    PCout <= PCin + 1;
+                end
+            end
+
+            3'b100: //XOR
+            begin
+                // Enable registers to load value
+                Aenable <= 1; 
+                Benable <= 1;
+
+                ALUsel <= 5'b01010;
+
+                if (ALUcomplete)
+                begin
+                    Osel <= 2'b00;
+                    rdOut <= rd;
+                    rdWrite <= 1;
+                    PCout <= PCin + 1;
+                end
+            end
+
+            3'b101: //Shift right logical or arithmetic
+            begin
+                // Enable registers to load value
+                Aenable <= 1; 
+                Benable <= 1;
+
+                case(funct7)
+                7'b0000000: //Logical shift right
+                begin
+                    ALUsel <= 5'b00101;
+                end
+                7'b0100000: //Arithmetic shift right
+                begin
+                    ALUsel <= 5'b01111;
+                end
+                endcase
+
+                if (ALUcomplete)
+                begin
+                    Osel <= 2'b00;
+                    rdOut <= rd;
+                    rdWrite <= 1;
+                    PCout <= PCin + 1;
+                end
+            end
+
+            3'b110: //OR
+            begin
+                // Enable registers to load value
+                Aenable <= 1; 
+                Benable <= 1;
+
+                ALUsel <= 5'b01011;
+
+                if (ALUcomplete)
+                begin
+                    Osel <= 2'b00;
+                    rdOut <= rd;
+                    rdWrite <= 1;
+                    PCout <= PCin + 1;
+                end
+            end
+
+            3'b111: //AND
+            begin
+                // Enable registers to load value
+                Aenable <= 1; 
+                Benable <= 1;
+
+                ALUsel <= 5'b01000;
+
+                if (ALUcomplete)
+                begin
+                    Osel <= 2'b00;
+                    rdOut <= rd;
+                    rdWrite <= 1;
+                    PCout <= PCin + 1;
+                end
+            end
+            endcase
+        end
+
+    end
+
+    7'b0110111: //Code 55 is Load upper immidiate word
+    begin
+        tempimmvalue = {immhi, 12'b000000000000};
+        immvalue <= tempimmvalue;
+        Bsel <= 2'b10; //Select immidiate value as B input
+        // Enable registers to load value
+        Benable <= 1;
+
+        //Select B register as output to send address
+        Osel <= 2'b10; 
+
+        mem_read <= 1; //Send signal for memory read
+
+        if (mem_ack) //After acknowledge signal has been received
+        begin
+            Aenable <= 1;
+            Asel <= 01; //Select data from bus as A input
+            Osel <= 01; //Select register A as output
+            rdOut <= rd; 
+            rdWrite <= 1; //Send signal to write output value into rd register
+            mem_read <= 0; //Reset the memory read signal
+            PCout <= PCin + 1;
+        end
+    end
+
     endcase
 end
 
