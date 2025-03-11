@@ -21,6 +21,7 @@ reg        mem_ack;
 reg        dataReady;
 reg [31:0] ALURes;
 reg        decodeComplete;
+reg        reset;
 
 // Output signals
 wire [31:0] PCout;
@@ -77,7 +78,8 @@ controller uut (
     .rs2Out(rs2Out),
     .ALURes(ALURes),
     .IRenable(IRenable),
-    .decodeComplete(decodeComplete)
+    .decodeComplete(decodeComplete),
+    .reset(reset)
 );
 
 // Generate clock signal
@@ -93,6 +95,7 @@ initial begin
                  $time, PCout, ALUsel, Asel, Osel, rdOut, Aenable, Benable, mem_read, immvalue);
 
     // Initialize inputs
+    reset = 1;
 
     ALU0 = 0;
     op = 7'b0000000;
@@ -110,6 +113,7 @@ initial begin
 
     /*
     // Apply a test case
+    reset = 0;
     op = 7'b0000011; // Load operation
     funct3 = 3'b000; // Load byte sign extended
     imm12 = 12'b100000000001; // Immediate value
@@ -126,6 +130,8 @@ initial begin
     #10
 
     // Apply a second test case
+    reset = 1;
+    reset = 0;
     ALUcomplete = 0;
     funct3 = 3'b001; // Load half word sign extended
     imm12 = 12'b100000000010; // Immediate value
@@ -147,6 +153,8 @@ initial begin
     */
 
     // Add immidiate case
+    reset = 1;
+    reset = 0;
     ALU0 = 0;
     op = 7'b0000000;
     funct3 = 3'b000;
@@ -176,6 +184,8 @@ initial begin
     #5
 
     //Shift left
+    reset = 1;
+    reset = 0;
     ALU0 = 0;
     op = 7'b0000000;
     funct3 = 3'b000;

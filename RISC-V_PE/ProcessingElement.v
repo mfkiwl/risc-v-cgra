@@ -14,6 +14,7 @@ module processing_element (
     input data_Ready,          // Data ready signal from bus
     input [31:0] AmuxIn,       // Data from bus to be loaded into A mux
     input [31:0] BmuxIn,       // Data from bus to be loaded into B mux
+    input        reset,
     output [31:0] mem_address, // Address for memory operations (store)
     output reg_select,         // Signal to select proper register to read
     output mem_read,           // Memory read signal     
@@ -97,7 +98,8 @@ module processing_element (
         .rdOut(rdOut),
         .rdWrite(rdWrite),
         .mem_read(mem_read),
-        .mem_write(mem_write) 
+        .mem_write(mem_write),
+        .reset(reset) 
     );
 
     // Instantiate the register modules A, B and IR

@@ -1,4 +1,5 @@
 //Modelo de la ALU de 32 bits para procesamiento de las funciones
+`define DEBUG
 
 module alu(
            input        clk,      // Clock input
@@ -11,8 +12,6 @@ module alu(
     integer i;
     reg [31:0] y;
     wire [32:0] tmp;
-    
-    assign tmp = {1'b0, A} + {1'b0, B};
 
     always @(posedge clk) begin
         ALUcomplete <= 0; // Indicates operation is in progress
@@ -27,8 +26,10 @@ module alu(
                if (B != 0) begin
                    ALU_Out <= A / B;
                end else begin
-                   $display("We cannot divide by 0");
-                   ALU_Out <= 32'hFFFFFFFF;
+                  `ifdef DEBUG
+                     $display("Error: Division by zero at time %t", $time);
+                  `endif
+                  ALU_Out <= 32'hFFFFFFFF; // Default error value
                end
             5'b00100: // Logical shift left
                ALU_Out <= A << B;
@@ -60,11 +61,7 @@ module alu(
                 end
             5'b01111: // SRA shift right arithmetic   
                 begin
-                   y = A;
-                   for (i = B; i > 0; i = i - 1) begin
-                       y = {y[31], y[31:1]};
-                   end
-                   ALU_Out <= y;
+                   ALU_Out <= A >>> B;
                 end
             5'b10000: // Take lower byte sign extended
                 begin

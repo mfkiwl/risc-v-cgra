@@ -10,6 +10,7 @@ reg mem_ack;
 reg data_Ready;
 reg [31:0] AmuxIn;
 reg [31:0] BmuxIn;
+reg        reset;
 wire [31:0] mem_address;
 wire reg_select;
 wire mem_read;
@@ -41,7 +42,8 @@ processing_element uut (
     .rdWrite(rdWrite),
     .mem_write(mem_write),
     .result_out(result_out),
-    .PCout(PCout)
+    .PCout(PCout),
+    .reset(reset)
 );
 
 // Generate clock signal
@@ -52,6 +54,10 @@ end
 
 // Initialize and apply test vectors
 initial begin
+    // Monitor outputs
+        $monitor("Time: %0dns | PCout: %d | mem_address: %b | reg_select: %b | mem_read: %b | mem_write: %b | messReg: %b | rs1: %b | rs2: %b | rd: %b | rd_Write: %b | result_out: %b", 
+                 $time, PCout, mem_address, reg_select, mem_read, mem_write, messReg, rs1Out, rs2Out, rdOut, rdWrite, result_out);
+
     // Initialize inputs
     PCin = 32'b0;
     instruction = 32'b0;
@@ -59,18 +65,29 @@ initial begin
     data_Ready = 0;
     AmuxIn = 32'b0;
     BmuxIn = 32'b0;
+    reset = 1;
 
-    // Apply a test case
-    #10;
+    
+
+    #10; //Second case lh
+    reset = 0;
     PCin = 32'h00000001; // Program counter input
-    instruction = 32'h00000013; // Example instruction
-    mem_ack = 1; // Memory acknowledgment signal
-    data_Ready = 1; // Data ready signal
-    AmuxIn = 32'h00000002; // Data from bus to be loaded into A mux
-    BmuxIn = 32'h00000003; // Data from bus to be loaded into B mux
+    instruction = 32'b000000100011_01011_001_10111_0000011; //Immidiate = 35, rs1 = 11, rd = 23, funct3 = 001, op = 3
+    mem_ack = 0; // Memory acknowledgment signal
+    data_Ready = 0; // Data ready signal
+    AmuxIn = 32'b00000000000000000000000000100101; // Data from bus to be loaded into A mux for address calculation. Value 35
+    BmuxIn = 32'b0; // Data from bus to be loaded into B mux
 
-    // Wait for some time to observe outputs
+    #10;
+    data_Ready = 1;
+
+    #10;
+    AmuxIn = 32'b00000000000000001000000010100101; // Data from bus to be loaded into A mux from address calculated. 
+    mem_ack = 1;
+    //Expected result: 11111111111111111_1000000010100101
+
     #50;
+
 
     // End the simulation
     $finish;
