@@ -39,7 +39,7 @@ module tb_Register;
         // Initialize signals
         reset = 1; // Assert reset
         r_enable = 0; 
-        data_in = 32'h00000000; 
+        data_in = 32'h00000030; 
         #10;
 
         reset = 0; // Deassert reset

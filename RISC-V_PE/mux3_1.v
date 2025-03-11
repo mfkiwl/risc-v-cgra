@@ -5,7 +5,6 @@ module mux3_1 (
     input      [1:0]  sel,
     output reg [31:0] data_out
 );
-    output reg [31:0] data_out = 32'b0;
     always @(*) begin
         case(sel)
             2'b00: data_out = in_1; // Select in_1

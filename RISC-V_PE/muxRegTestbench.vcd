@@ -1,0 +1,257 @@
+$date
+	Tue Mar 11 16:05:53 2025
+$end
+$version
+	Icarus Verilog
+$end
+$timescale
+	1ps
+$end
+$scope module tb_MUXReg $end
+$var wire 32 ! Bout [31:0] $end
+$var wire 32 " Aout [31:0] $end
+$var reg 1 # Aenable $end
+$var reg 2 $ Asel [1:0] $end
+$var reg 1 % Benable $end
+$var reg 2 & Bsel [1:0] $end
+$var reg 1 ' clk $end
+$var reg 32 ( inBusA [31:0] $end
+$var reg 32 ) inBusB [31:0] $end
+$var reg 32 * inImm [31:0] $end
+$var reg 32 + inPC [31:0] $end
+$var reg 32 , inRs1 [31:0] $end
+$var reg 32 - inRs2 [31:0] $end
+$var reg 1 . reset $end
+$scope module uut $end
+$var wire 1 # Aenable $end
+$var wire 2 / Asel [1:0] $end
+$var wire 1 % Benable $end
+$var wire 2 0 Bsel [1:0] $end
+$var wire 1 ' clk $end
+$var wire 32 1 inBusA [31:0] $end
+$var wire 32 2 inBusB [31:0] $end
+$var wire 32 3 inImm [31:0] $end
+$var wire 32 4 inPC [31:0] $end
+$var wire 32 5 inRs1 [31:0] $end
+$var wire 32 6 inRs2 [31:0] $end
+$var wire 1 . reset $end
+$var wire 32 7 Bsignal [31:0] $end
+$var wire 32 8 Bout [31:0] $end
+$var wire 32 9 Asignal [31:0] $end
+$var wire 32 : Aout [31:0] $end
+$scope module muxA $end
+$var wire 32 ; in_1 [31:0] $end
+$var wire 32 < in_2 [31:0] $end
+$var wire 32 = in_3 [31:0] $end
+$var wire 2 > sel [1:0] $end
+$var reg 32 ? data_out [31:0] $end
+$upscope $end
+$scope module muxB $end
+$var wire 32 @ in_1 [31:0] $end
+$var wire 32 A in_2 [31:0] $end
+$var wire 32 B in_3 [31:0] $end
+$var wire 2 C sel [1:0] $end
+$var reg 32 D data_out [31:0] $end
+$upscope $end
+$scope module regA $end
+$var wire 1 ' clock $end
+$var wire 32 E data_in [31:0] $end
+$var wire 1 # r_enable $end
+$var wire 1 . reset $end
+$var reg 32 F data_out [31:0] $end
+$upscope $end
+$scope module regB $end
+$var wire 1 ' clock $end
+$var wire 32 G data_in [31:0] $end
+$var wire 1 % r_enable $end
+$var wire 1 . reset $end
+$var reg 32 H data_out [31:0] $end
+$upscope $end
+$upscope $end
+$upscope $end
+$enddefinitions $end
+$comment Show the parameter values. $end
+$dumpall
+$end
+#0
+$dumpvars
+b0 H
+b0 G
+b0 F
+b0 E
+b0 D
+bx C
+b0 B
+b0 A
+b0 @
+b0 ?
+bx >
+b0 =
+b0 <
+b0 ;
+b0 :
+b0 9
+b0 8
+b0 7
+b0 6
+b0 5
+b0 4
+b0 3
+b0 2
+b0 1
+bx 0
+bx /
+1.
+b0 -
+b0 ,
+b0 +
+b0 *
+b0 )
+b0 (
+0'
+bx &
+0%
+bx $
+0#
+b0 "
+b0 !
+$end
+#5000
+1'
+#10000
+0'
+0.
+#15000
+1'
+#20000
+b1010100 7
+b1010100 D
+b1010100 G
+b100011 9
+b100011 ?
+b100011 E
+0'
+b1100 *
+b1100 3
+b1100 B
+b110100 +
+b110100 4
+b110100 =
+b1000011 )
+b1000011 2
+b1000011 A
+b10110 (
+b10110 1
+b10110 <
+b1010100 -
+b1010100 6
+b1010100 @
+b100011 ,
+b100011 5
+b100011 ;
+b0 &
+b0 0
+b0 C
+b0 $
+b0 /
+b0 >
+#25000
+1'
+#30000
+0'
+1%
+1#
+#35000
+b100011 "
+b100011 :
+b100011 F
+b1010100 !
+b1010100 8
+b1010100 H
+1'
+#40000
+0'
+0%
+0#
+#45000
+1'
+#50000
+b1000011 7
+b1000011 D
+b1000011 G
+b10110 9
+b10110 ?
+b10110 E
+0'
+b1 &
+b1 0
+b1 C
+b1 $
+b1 /
+b1 >
+1%
+1#
+#55000
+b10110 "
+b10110 :
+b10110 F
+b1000011 !
+b1000011 8
+b1000011 H
+1'
+#60000
+0'
+0%
+0#
+#65000
+1'
+#70000
+b0 "
+b0 :
+b0 F
+b0 !
+b0 8
+b0 H
+0'
+1.
+#75000
+1'
+#80000
+0'
+0.
+#85000
+1'
+#90000
+b1100 7
+b1100 D
+b1100 G
+b110100 9
+b110100 ?
+b110100 E
+0'
+b10 &
+b10 0
+b10 C
+b10 $
+b10 /
+b10 >
+#95000
+1'
+#100000
+0'
+1%
+1#
+#105000
+b110100 "
+b110100 :
+b110100 F
+b1100 !
+b1100 8
+b1100 H
+1'
+#110000
+0'
+#115000
+1'
+#120000
+0'
