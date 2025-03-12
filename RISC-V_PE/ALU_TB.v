@@ -134,8 +134,8 @@ module tb_alu;
          #10;
 
          // Test case for SRA (Shift Right Arithmetic)
-         A = -8;
-         B = 2;
+         A = 32'b11111111000000000000000000100101;
+         B = 4;
          ALU_Sel = 5'b01111; // SRA operation
          #10;
 

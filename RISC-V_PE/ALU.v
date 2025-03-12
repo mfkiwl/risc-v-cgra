@@ -61,8 +61,13 @@ module alu(
                 end
             5'b01111: // SRA shift right arithmetic   
                 begin
-                   ALU_Out <= A >>> B;
-                end
+                     y = A;
+				         for (i = B; i > 0; i = i - 1) 
+                     begin
+					         y = {y[31],y[31:1]};
+				         end
+				         ALU_Out = y;
+               end
             5'b10000: // Take lower byte sign extended
                 begin
                    if (A[7] == 1) begin
