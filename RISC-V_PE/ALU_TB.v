@@ -15,7 +15,7 @@ module tb_alu;
     reg [4:0] ALU_Sel;
     wire [31:0] ALU_Out;
     wire Zero;
-    wire complete;
+    wire ALUcomplete;
 
     initial $dumpfile("alutestbench.vcd");
     initial $dumpvars(0, tb_alu);
@@ -28,7 +28,7 @@ module tb_alu;
         .ALU_Sel(ALU_Sel),
         .ALU_Out(ALU_Out),
         .Zero(Zero),
-        .complete(complete)
+        .ALUcomplete(ALUcomplete)
     );
 
     // Clock generation
@@ -40,8 +40,8 @@ module tb_alu;
     // Test procedure
     initial begin
         // Monitor outputs
-        $monitor("Time: %0dns | A: %h | B: %h | ALU_Sel: %b | ALU_Out: %b | Zero: %b", 
-                 $time, A, B, ALU_Sel, ALU_Out, Zero);
+        $monitor("Time: %0dns | A: %h | B: %h | ALU_Sel: %b | ALU_Out: %b | Zero: %b | Complete: %b", 
+                 $time, A, B, ALU_Sel, ALU_Out, Zero, ALUcomplete);
 
         // Test case 1: Addition
         A = 32'h00000005; 

@@ -64,6 +64,8 @@ module tb_MUXReg;
         inBusB = 0;
         inPC = 0;
         inImm = 0;
+        Asel = 0;
+        Bsel = 0;
         #10;
 
         reset = 0; // Deassert reset
@@ -120,9 +122,9 @@ module tb_MUXReg;
         //Enable values to see PC and imm value
         Aenable = 1;
         Benable = 1;
-        #10
+        #10;
 
-        #10
+        #10;
          $finish;
     end
 
