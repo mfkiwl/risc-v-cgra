@@ -417,14 +417,16 @@ begin
             Benable <= 1;
 
             case(funct3)
-            3'b000: //Add and substract
+            3'b000: //Add, substract, multiply
             begin
                 if (funct7 == 7'b0000000) begin
                     ALUsel <= 5'b00000; // Add
                 end else if (funct7 == 7'b0100000) begin
                     ALUsel <= 5'b00001; // Subtract
+                end else if (funct7 == 7'b0000001) begin
+                    ALUSel <= 5'b00010; //multiply
                 end
-                
+
                 if (ALUcomplete_sync)
                 begin
                     //Osel <= 2'b00;
