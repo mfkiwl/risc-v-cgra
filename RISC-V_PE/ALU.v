@@ -1,25 +1,46 @@
 //Modelo de la ALU de 32 bits para procesamiento de las funciones
 `define DEBUG
 
+`include "Subtraction.v"
+
 module alu(
            input        clk,      // Clock input
            input [31:0] A, B,     // ALU 32-bit Inputs                 
            input [4:0]  ALU_Sel,  // ALU Selection
            output reg [31:0] ALU_Out, // ALU 32-bit Output
            output reg Zero,        // Zero flag when ALU output is 0
-           output reg ALUcomplete  // Indicates end of operation
+           output reg ALUcomplete,  // Indicates end of operation
+           output reg Cout          // Value of carry out for adder
     );
     integer i;
     reg [31:0] y;
     wire [32:0] tmp;
 
+    wire [31:0] add_result, sub_result;
+    wire add_carry_out, sub_borrow;
+
+RippleCarryAdder adder (
+    .A(A),
+    .B(B),
+    .Cin(1'b0),      // No carry-in for simple addition
+    .Sum(add_result),
+    .Cout(add_carry_out)
+);
+    
+Subtraction subtractor (
+    .A(A),
+    .B(B),
+    .Diff(sub_result),
+    .Borrow(sub_borrow)  
+);
+
     always @(posedge clk) begin
         ALUcomplete <= 0; // Indicates operation is in progress
         case (ALU_Sel)
             5'b00000: // Addition
-               ALU_Out <= A + B; 
+               ALU_Out <= add_result;
             5'b00001: // Subtraction
-               ALU_Out <= A - B;
+               ALU_Out <= sub_result;
             5'b00010: // Multiplication
                ALU_Out <= A * B;
             5'b00011: // Division
@@ -92,7 +113,7 @@ module alu(
                 begin
                    ALU_Out <= {16'b0, A[15:0]};
                 end  
-            default: ALU_Out <= A + B; 
+            default: ALU_Out <= 32'b0;
         endcase
 
         Zero <= (ALU_Out == 0) ? 1 : 0;
