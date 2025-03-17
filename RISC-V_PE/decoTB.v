@@ -88,6 +88,11 @@ module tb_decoder;
         #10;
         instruction = 32'b0;
 
+        // Test case store:
+        instruction = 32'b0000001_01011_10111_000_00011_0100011; //store byte
+        #10
+        instruction = 32'b0;
+
          $finish;
     end
 

@@ -149,7 +149,8 @@ module processing_element (
         .ALU_Sel(ALUsel), 
         .ALU_Out(ALURes),  // Output result from ALU operation.
         .Zero(ALU0),
-        .ALUcomplete(ALUcomplete)
+        .ALUcomplete(ALUcomplete),
+        .reset(reg_reset)
     );
 
     // Instantiate MUXes 

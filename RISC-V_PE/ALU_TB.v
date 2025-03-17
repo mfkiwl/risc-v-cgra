@@ -68,8 +68,8 @@ module tb_alu;
         #10;
 
         // Test case 5: Logical Shift Left
-        A = 32'h00000001; 
-        B = 32'h00000000; 
+        A = 32'b00000000000000000000000000100101; 
+        B = 32'b00000000000000000000000000000011; 
         ALU_Sel = 5'b00100; // Shift left
         #10;
 
@@ -161,6 +161,12 @@ module tb_alu;
          A = 32'b10111111001111011101011010110101;
          B = 32'b0;
          ALU_Sel = 5'b10011; // byte unsigned
+         #10;
+
+         // Test case for invalid ALU select
+         A = 32'b10111111001111011101011010110101;
+         B = 32'b0;
+         ALU_Sel = 5'b11111; //Should trigger an ALU Complete of 0
          #10;
 
          $finish;

@@ -99,6 +99,7 @@ initial begin
     Osel = 2'b00;
     dataReady_sync = 0;
     ALUcomplete_sync = 0;
+    tempAddress = 0;
 end
 
 always @(posedge clk or posedge reset) 
@@ -122,8 +123,10 @@ begin
         rs2Out <= 0;
         reg_select <= 0;
         mem_write <= 0;
-        dataReady_sync = 0;
-        ALUcomplete_sync = 0;
+        dataReady_sync <= 0;
+        ALUcomplete_sync <= 0;
+        mem_address <= 0;
+        tempAddress <= 0;
     
         reg_reset <= 0;
         IRenable <= 1;
@@ -221,7 +224,6 @@ begin
         begin
             Asel <= 2'b01; //Select data comming from bus
             tempimmvalue = sign_extend(imm12);
-            immvalue <= tempimmvalue;
             Bsel <= 2'b10; //Select immidiate value as B input
             // Enable registers to load value
             Aenable <= 1; 
@@ -232,6 +234,7 @@ begin
             begin
                 //Select ALU to add values
                 ALUsel <= 5'b00000;
+                immvalue <= tempimmvalue;
 
                 if (ALUcomplete_sync)
                 begin
@@ -245,7 +248,7 @@ begin
 
             3'b001: //Shift left
             begin
-                immvalue <= {27'b000000000000000000000000000, tempimmvalue[4:0]};
+                immvalue <= {27'b000000000000000000000000000, imm12[4:0]};
                 Bsel <= 2'b10;
                 // Enable registers to load value
                 Aenable <= 1; 
@@ -283,7 +286,7 @@ begin
                 end
             end
 
-            3'b011: //Set less than unsigned
+            3'b011: //Set less imm than unsigned
             begin
                 immvalue <= tempimmvalue;
                 Bsel <= 2'b10;
@@ -325,7 +328,7 @@ begin
 
             3'b101: //Shift right logical or arithmetic
             begin
-                immvalue <= {27'b000000000000000000000000000, tempimmvalue[4:0]};
+                immvalue <= {27'b000000000000000000000000000, imm12[4:0]};
                 Bsel <= 2'b10;
                 // Enable registers to load value
                 Aenable <= 1; 
@@ -360,7 +363,7 @@ begin
                 Aenable <= 1; 
                 Benable <= 1;
 
-                ALUsel <= 5'b01011;
+                ALUsel <= 5'b01001;
 
                 if (ALUcomplete_sync)
                 begin
@@ -424,7 +427,7 @@ begin
                 end else if (funct7 == 7'b0100000) begin
                     ALUsel <= 5'b00001; // Subtract
                 end else if (funct7 == 7'b0000001) begin
-                    ALUSel <= 5'b00010; //multiply
+                    ALUsel <= 5'b00010; //multiply
                 end
 
                 if (ALUcomplete_sync)
@@ -617,63 +620,81 @@ begin
         Aenable <= 0;
         Benable <= 0;
         PCout <= PCin; // By default, retain the same PC value
+        Osel <= 0;
+        reg_reset <= 1;
         reg_reset <= 0;
         rs1Out <= rs1;
         reg_select <= 0; //Selects data from rs1 to pull 
-        if (dataReady_sync && !ALUcomplete_sync)
-        begin
-            Asel = 2'b01; //Select data from bus
-            if (imm12[11]==0)
-            begin
-                tempimmvalue = {20'b00000000000000000000, imm12};
-            end
-            else
-            begin
-                tempimmvalue = {20'b11111111111111111111, imm12};
-            end
-            immvalue <= tempimmvalue;
-            Bsel <= 2'b10; //Select immidiate value as B input
+        //ALUsel <= 5'b11111;
+        $display("I'm at the start of the store case ");
+        Asel = 2'b01; //Select data from bus
+        Bsel <= 2'b10; //Select immidiate value as B input
+        immvalue <= sign_extend(imm12);
 
+        if (!dataReady_sync && tempAddress == 0)
+        begin
+            ALUsel <= 5'b11111;
+        end
+
+        if (dataReady_sync && tempAddress == 0)
+        begin
+            $display("I'm at the first data sync while ALUComplete is 0 and no tempAddress has been calculated");
             // Enable registers to load value
             Aenable <= 1; 
             Benable <= 1;
 
             //Select ALU to add values
             ALUsel <= 5'b00000;
+
+            if (ALUcomplete_sync)
+            begin
+                
+                $display("I'm at the calculation of the address, with ALUComplete = 1");
+                tempAddress <= ALURes;
+            end
+
         end
 
-        if (ALUcomplete_sync)
+        else if (!dataReady_sync && tempAddress !=0)
         begin
-                tempAddress <= ALURes;
+            ALUsel <= 5'b11111;
+            Aenable <= 1;
+            rs2Out <= rs2;
+            reg_select <= 1; //Selects register rs2 to pull data from
+            Asel <= 2'b01; //Select data from bus
+        end
 
-                rs2Out <= rs2;
-                reg_select <= 1; //Selects register rs2 to pull data from
-                if (dataReady_sync && ALUcomplete_sync)
+        else if (dataReady_sync && tempAddress != 0)
+        begin
+            $display("I'm at the loading of rs2, with ALUComplete at 0 and tempAddress stored");
+
+            case(funct3)
+            3'b000: //Store byte
                 begin
-                    Asel <= 2'b01; //Select data from bus
-                    case(funct3)
-                    3'b000: //Store byte
-                    begin
-                        ALUsel = 5'b10010; //Take only lower byte of rs2 value
-                        Osel = 2'b00; //Select output from ALU
-                    end 
+                    ALUsel = 5'b10010; //Take only lower byte of rs2 value
+                    Osel = 2'b00; //Select output from ALU
+                end 
 
-                    3'b001: //Store half word
-                    begin
-                        ALUsel = 5'b10011; //Take lower half word of rs2 value
-                        Osel = 2'b00; //Select output from ALU
-                    end
-                    
-                    3'b010: //Store word
-                    begin
-                        Osel = 2'b01; //Select reg A as output
-                    end
-                    endcase
-
-                    mem_address <= tempAddress; //Use the calculated destination address to store the value
-                    mem_write <= 1; //Indicates that value at output will be stored at mem_address
-                    PCout <= PCin + 1;
+            3'b001: //Store half word
+                begin
+                    ALUsel = 5'b10011; //Take lower half word of rs2 value
+                    Osel = 2'b00; //Select output from ALU
                 end
+                    
+            3'b010: //Store word
+                begin
+                    ALUsel = 5'b10100;
+                    Osel = 2'b00; //Select output from ALU
+                end
+            endcase
+
+            if (ALUcomplete_sync)
+            begin
+                $display("I'm at the final stage, with ALUComplete at 1 and tempAddress Calculated");
+                mem_address <= tempAddress; //Use the calculated destination address to store the value
+                mem_write <= 1; //Indicates that value at output will be stored at mem_address
+                PCout <= PCin + 1;
+            end
         end
     end
 
