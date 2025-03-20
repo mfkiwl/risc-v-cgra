@@ -1,5 +1,5 @@
 //Modelo de la ALU de 32 bits para procesamiento de las funciones
-`define DEBUG
+//`define DEBUG
 
 `include "Subtraction.v"
 
@@ -50,6 +50,7 @@ Subtraction subtractor (
             begin
                ALU_Out <= add_result;
                ALUcomplete <= 1;
+               Cout <= add_carry_out;
                //ALU_Out = A + B;
             end
             5'b00001: // Subtraction
@@ -142,7 +143,7 @@ Subtraction subtractor (
                      begin
 					         y = {y[31],y[31:1]};
 				         end
-				         ALU_Out = y;
+				         ALU_Out <= y;
                      ALUcomplete <= 1;
                end
             5'b10000: // Take lower byte sign extended
@@ -189,7 +190,6 @@ Subtraction subtractor (
         endcase
 
         Zero <= (ALU_Out == 0) ? 1 : 0;
-        $display ("ALU Result: %b", ALU_Out);
     end
 
 endmodule

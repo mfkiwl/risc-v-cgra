@@ -14,7 +14,6 @@ module Register (
             data_out <= 32'b0; // Reset the output to 0
         end else if (r_enable) begin
             data_out <= data_in; // Load data on enable
-            $display("data_out: %b", data_out);
         end
     end
 

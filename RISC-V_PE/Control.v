@@ -532,11 +532,11 @@ begin
 
                 if (ALUcomplete_sync)
                 begin
-                    //Osel <= 2'b00;
-                    //rdOut <= rd;
-                    //rdWrite <= 1;
-                    //PCout <= PCin + 1;
-                    complete_operation(2'b00,rd);
+                    Osel <= 2'b00;
+                    rdOut <= rd;
+                    rdWrite <= 1;
+                    PCout <= PCin + 1;
+                    //complete_operation(2'b00,rd);
                 end
             end
 
@@ -546,7 +546,7 @@ begin
                 Aenable <= 1; 
                 Benable <= 1;
 
-                ALUsel <= 5'b01011;
+                ALUsel <= 5'b01001;
 
                 if (ALUcomplete_sync)
                 begin
@@ -626,7 +626,6 @@ begin
         rs1Out <= rs1;
         reg_select <= 0; //Selects data from rs1 to pull 
         //ALUsel <= 5'b11111;
-        $display("I'm at the start of the store case ");
         Asel = 2'b01; //Select data from bus
         Bsel <= 2'b10; //Select immidiate value as B input
         immvalue <= sign_extend(imm12);
@@ -638,7 +637,6 @@ begin
 
         if (dataReady_sync && tempAddress == 0)
         begin
-            $display("I'm at the first data sync while ALUComplete is 0 and no tempAddress has been calculated");
             // Enable registers to load value
             Aenable <= 1; 
             Benable <= 1;
@@ -648,8 +646,6 @@ begin
 
             if (ALUcomplete_sync)
             begin
-                
-                $display("I'm at the calculation of the address, with ALUComplete = 1");
                 tempAddress <= ALURes;
             end
 
@@ -666,7 +662,6 @@ begin
 
         else if (dataReady_sync && tempAddress != 0)
         begin
-            $display("I'm at the loading of rs2, with ALUComplete at 0 and tempAddress stored");
 
             case(funct3)
             3'b000: //Store byte
@@ -690,7 +685,6 @@ begin
 
             if (ALUcomplete_sync)
             begin
-                $display("I'm at the final stage, with ALUComplete at 1 and tempAddress Calculated");
                 mem_address <= tempAddress; //Use the calculated destination address to store the value
                 mem_write <= 1; //Indicates that value at output will be stored at mem_address
                 PCout <= PCin + 1;

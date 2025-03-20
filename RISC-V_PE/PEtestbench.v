@@ -711,13 +711,13 @@ initial begin
     BmuxIn = 32'b0;
     reset = 1;
 
-    #10; //Fifth case ALU operands
+    #10; //Eighteenth case ALU operands
     $display ("##############################################################################");
-    $display ("############### Start of ALU with register values SRA case ###################");
+    $display ("############### Start of ALU with register values Add case ###################");
     $display ("##############################################################################");
     reset = 0;
-    PCin = 32'h00000005; // Program counter input
-    instruction = 32'b0100000_01100_01011_101_00001_0110011; //funct7 = 0100000, rs1 = 11, rd = 1, funct3 = 101, op = 51
+    PCin = 17; // Program counter input
+    instruction = 32'b0000000_01100_01011_000_00001_0110011; //funct7 = 0000000, rs1 = 1, rs2 = 11, rd = 1, funct3 = 000, op = 51
     mem_ack = 0; // Memory acknowledgment signal
     data_Ready = 0; // Data ready signal
     AmuxIn = 32'b11111111000000000000000000100101; // Data from bus to be loaded into A mux  
@@ -727,11 +727,332 @@ initial begin
     data_Ready = 1;
 
     #50;
-    //Expected result: 11111111111100000000000000000010
-    if (result_out == 32'b11111111111100000000000000000010) 
+    //Expected result: 11111111000000000000000000101001
+    if (result_out == 32'b11111111000000000000000000101001) 
     begin
         $display ("Result as expected");
     end
+
+    #10;
+    // Initialize inputs
+    PCin = 32'b0;
+    instruction = 32'b0;
+    mem_ack = 0;
+    data_Ready = 0;
+    AmuxIn = 32'b0;
+    BmuxIn = 32'b0;
+    reset = 1;
+
+    #10; //Nineteenth case ALU operands
+    $display ("##############################################################################");
+    $display ("############### Start of ALU with register values Subtract case ###################");
+    $display ("##############################################################################");
+    reset = 0;
+    PCin = 18; // Program counter input
+    instruction = 32'b0100000_01100_01011_000_00001_0110011; //funct7 = 0000000, rs1 = 1, rs2 = 11, rd = 1, funct3 = 000, op = 51
+    mem_ack = 0; // Memory acknowledgment signal
+    data_Ready = 0; // Data ready signal
+    AmuxIn = 32'b11111111000000000000000000100101; // Data from bus to be loaded into A mux  
+    BmuxIn = 32'b00000000000000000000000000000100; // Data from bus to be loaded into B mux
+
+    #10;
+    data_Ready = 1;
+
+    #50;
+    //Expected result: 111111111000000000000000000100001
+    if (result_out == 32'b11111111000000000000000000100001) 
+    begin
+        $display ("Result as expected");
+    end
+
+    #10;
+    // Initialize inputs
+    PCin = 32'b0;
+    instruction = 32'b0;
+    mem_ack = 0;
+    data_Ready = 0;
+    AmuxIn = 32'b0;
+    BmuxIn = 32'b0;
+    reset = 1;
+
+    #10; //Twentieth case ALU operands
+    $display ("##############################################################################");
+    $display ("############### Start of ALU with register values SLL case ###################");
+    $display ("##############################################################################");
+    reset = 0;
+    PCin = 19; // Program counter input
+    instruction = 32'b0000000_01100_01011_001_00001_0110011; //funct7 = 0000000, rs1 = 1, rs2 = 11, rd = 1, funct3 = 001, op = 51
+    mem_ack = 0; // Memory acknowledgment signal
+    data_Ready = 0; // Data ready signal
+    AmuxIn = 32'b11111111000000000000000000100101; // Data from bus to be loaded into A mux  
+    BmuxIn = 32'b00000000000000000000000000000100; // Data from bus to be loaded into B mux
+
+    #10;
+    data_Ready = 1;
+
+    #50;
+    //Expected result: b11110000000000000000001001010000
+    if (result_out == 32'b11110000000000000000001001010000) 
+    begin
+        $display ("Result as expected");
+    end
+
+    #10;
+    // Initialize inputs
+    PCin = 32'b0;
+    instruction = 32'b0;
+    mem_ack = 0;
+    data_Ready = 0;
+    AmuxIn = 32'b0;
+    BmuxIn = 32'b0;
+    reset = 1;
+
+    #10; //Twentyfirst case ALU operands
+    $display ("##############################################################################");
+    $display ("############### Start of ALU with register values SLT case ###################");
+    $display ("##############################################################################");
+    reset = 0;
+    PCin = 20; // Program counter input
+    instruction = 32'b0000000_01100_01011_010_00001_0110011; //funct7 = 0000000, rs1 = 1, rs2 = 11, rd = 1, funct3 = 010, op = 51
+    mem_ack = 0; // Memory acknowledgment signal
+    data_Ready = 0; // Data ready signal
+    AmuxIn = 32'b10000000000000000000000000000101; // Data from bus to be loaded into A mux  
+    BmuxIn = 32'b00000000000000000000000000000100; // Data from bus to be loaded into B mux
+
+    #10;
+    data_Ready = 1;
+
+    #50;
+    //Expected result: b00000000000000000000000000000001
+    if (result_out == 32'b00000000000000000000000000000001) 
+    begin
+        $display ("Result as expected");
+    end
+
+    #10;
+    // Initialize inputs
+    PCin = 32'b0;
+    instruction = 32'b0;
+    mem_ack = 0;
+    data_Ready = 0;
+    AmuxIn = 32'b0;
+    BmuxIn = 32'b0;
+    reset = 1;
+
+    #10; //Twentysecond case ALU operands
+    $display ("##############################################################################");
+    $display ("############### Start of ALU with register values SLTU case ###################");
+    $display ("##############################################################################");
+    reset = 0;
+    PCin = 21; // Program counter input
+    instruction = 32'b0000000_01100_01011_011_00001_0110011; //funct7 = 0000000, rs1 = 1, rs2 = 11, rd = 1, funct3 = 011, op = 51
+    mem_ack = 0; // Memory acknowledgment signal
+    data_Ready = 0; // Data ready signal
+    AmuxIn = 32'b10000000000000000000000000000011; // Data from bus to be loaded into A mux  
+    BmuxIn = 32'b00000000000000000000000000000100; // Data from bus to be loaded into B mux
+
+    #10;
+    data_Ready = 1;
+
+    #50;
+    //Expected result: b00000000000000000000000000000000
+    if (result_out == 32'b00000000000000000000000000000000) 
+    begin
+        $display ("Result as expected");
+    end
+
+    #10;
+    // Initialize inputs
+    PCin = 32'b0;
+    instruction = 32'b0;
+    mem_ack = 0;
+    data_Ready = 0;
+    AmuxIn = 32'b0;
+    BmuxIn = 32'b0;
+    reset = 1;
+
+    #10; //Twentythird case ALU operands
+    $display ("##############################################################################");
+    $display ("############### Start of ALU with register values SLTU case ###################");
+    $display ("##############################################################################");
+    reset = 0;
+    PCin = 22; // Program counter input
+    instruction = 32'b0000000_01100_01011_100_00001_0110011; //funct7 = 0000000, rs1 = 1, rs2 = 11, rd = 1, funct3 = 100, op = 51
+    mem_ack = 0; // Memory acknowledgment signal
+    data_Ready = 0; // Data ready signal
+    AmuxIn = 32'b10100010110000001000000010100101; // Data from bus to be loaded into A mux  
+    BmuxIn = 32'b00101010000001010000010000000100; // Data from bus to be loaded into B mux
+
+    #10;
+    data_Ready = 1;
+
+    #50;
+    //Expected result: b10001000110001011000010010100001
+    if (result_out == 32'b10001000110001011000010010100001) 
+    begin
+        $display ("Result as expected");
+    end
+
+    #10;
+    // Initialize inputs
+    PCin = 32'b0;
+    instruction = 32'b0;
+    mem_ack = 0;
+    data_Ready = 0;
+    AmuxIn = 32'b0;
+    BmuxIn = 32'b0;
+    reset = 1;
+
+    #10; //Twentyfourth case ALU operands
+    $display ("##############################################################################");
+    $display ("############### Start of ALU with register values SRL case ###################");
+    $display ("##############################################################################");
+    reset = 0;
+    PCin = 23; // Program counter input
+    instruction = 32'b0000000_01100_01011_101_00001_0110011; //funct7 = 0000000, rs1 = 1, rs2 = 11, rd = 1, funct3 = 101, op = 51
+    mem_ack = 0; // Memory acknowledgment signal
+    data_Ready = 0; // Data ready signal
+    AmuxIn = 32'b10100010110000001000000010100101; // Data from bus to be loaded into A mux  
+    BmuxIn = 32'b00000000000000000000000000000100; // Data from bus to be loaded into B mux
+
+    #10;
+    data_Ready = 1;
+
+    #50;
+    //Expected result: b00001010001011000000100000001010
+    if (result_out == 32'b00001010001011000000100000001010) 
+    begin
+        $display ("Result as expected");
+    end
+
+    #10;
+    // Initialize inputs
+    PCin = 32'b0;
+    instruction = 32'b0;
+    mem_ack = 0;
+    data_Ready = 0;
+    AmuxIn = 32'b0;
+    BmuxIn = 32'b0;
+    reset = 1;
+
+    #10; //Twentyfifth case ALU operands
+    $display ("##############################################################################");
+    $display ("############### Start of ALU with register values SRA case ###################");
+    $display ("##############################################################################");
+    reset = 0;
+    PCin = 24; // Program counter input
+    instruction = 32'b0100000_01100_01011_101_00001_0110011; //funct7 = 0100000, rs1 = 1, rs2 = 11, rd = 1, funct3 = 101, op = 51
+    mem_ack = 0; // Memory acknowledgment signal
+    data_Ready = 0; // Data ready signal
+    AmuxIn = 32'b10100010110000001000000010100101; // Data from bus to be loaded into A mux  
+    BmuxIn = 32'b00000000000000000000000000000100; // Data from bus to be loaded into B mux
+
+    #10;
+    data_Ready = 1;
+
+    #50;
+    //Expected result: b11111010001011000000100000001010
+    if (result_out == 32'b11111010001011000000100000001010) 
+    begin
+        $display ("Result as expected");
+    end
+
+    #10;
+    // Initialize inputs
+    PCin = 32'b0;
+    instruction = 32'b0;
+    mem_ack = 0;
+    data_Ready = 0;
+    AmuxIn = 32'b0;
+    BmuxIn = 32'b0;
+    reset = 1;
+
+    #10; //Twentysixth case ALU operands
+    $display ("##############################################################################");
+    $display ("############### Start of ALU with register values OR case ###################");
+    $display ("##############################################################################");
+    reset = 0;
+    PCin = 25; // Program counter input
+    instruction = 32'b0000000_01100_01011_110_00001_0110011; //funct7 = 0000000, rs1 = 1, rs2 = 11, rd = 1, funct3 = 110, op = 51
+    mem_ack = 0; // Memory acknowledgment signal
+    data_Ready = 0; // Data ready signal
+    AmuxIn = 32'b10100010110000001000000010100101; // Data from bus to be loaded into A mux  
+    BmuxIn = 32'b00101010000001010000010000000100; // Data from bus to be loaded into B mux
+                 
+    #10;
+    data_Ready = 1;
+
+    #50;
+    //Expected result: b10101010110001011000010010100101
+    if (result_out == 32'b10101010110001011000010010100101) 
+    begin
+        $display ("Result as expected");
+    end
+
+    #10;
+    // Initialize inputs
+    PCin = 32'b0;
+    instruction = 32'b0;
+    mem_ack = 0;
+    data_Ready = 0;
+    AmuxIn = 32'b0;
+    BmuxIn = 32'b0;
+    reset = 1;
+
+    #10; //Twentyseventh case ALU operands
+    $display ("##############################################################################");
+    $display ("############### Start of ALU with register values AND case ###################");
+    $display ("##############################################################################");
+    reset = 0;
+    PCin = 26; // Program counter input
+    instruction = 32'b0000000_01100_01011_111_00001_0110011; //funct7 = 0000000, rs1 = 1, rs2 = 11, rd = 1, funct3 = 111, op = 51
+    mem_ack = 0; // Memory acknowledgment signal
+    data_Ready = 0; // Data ready signal
+    AmuxIn = 32'b10100010110000001000000010100101; // Data from bus to be loaded into A mux  
+    BmuxIn = 32'b00101010000001010000010000000100; // Data from bus to be loaded into B mux
+                     
+    #10;
+    data_Ready = 1;
+
+    #50;
+    //Expected result: 00100010000000000000000000000100
+    if (result_out == 32'b00100010000000000000000000000100) 
+    begin
+        $display ("Result as expected");
+    end
+
+    #10;
+    // Initialize inputs
+    PCin = 32'b0;
+    instruction = 32'b0;
+    mem_ack = 0;
+    data_Ready = 0;
+    AmuxIn = 32'b0;
+    BmuxIn = 32'b0;
+    reset = 1;
+
+    #10; //Twentyeigth case ALU operands
+    $display ("##############################################################################");
+    $display ("############### Start of Load upper immidiate case ###################");
+    $display ("##############################################################################");
+    reset = 0;
+    PCin = 26; // Program counter input
+    instruction = 32'b10110010110100101110_00001_0110111; //20 bit upper imm, rd = 1,  op = 55
+    mem_ack = 0; // Memory acknowledgment signal
+    data_Ready = 0; // Data ready signal
+    AmuxIn = 32'b01000001000000010000000011001000; // Data from bus to be loaded into A mux  
+    BmuxIn = 32'b00000000000000000000000000000000; // Data from bus to be loaded into B mux
+                     
+    #30;
+    mem_ack = 1;
+
+    #30;
+    //Expected result: b01000001000000010000000011001000
+    if (result_out == 32'b01000001000000010000000011001000) 
+    begin
+        $display ("Result as expected");
+    end
+
 
     // End the simulation
     $finish;
