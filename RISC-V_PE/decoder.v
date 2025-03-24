@@ -45,7 +45,7 @@ always @(*) begin
         7'b1101111: // Type J instruction
             begin
                 rd <= instruction[11:7];
-                immhi <= instruction[31:12];
+                immhi <= {instruction[31], instruction[19:12], instruction[20], instruction[30:21]};
             end
 
         7'b0010111 , 7'b0110111: //Type U instruction
@@ -67,7 +67,7 @@ always @(*) begin
                 funct3 <= instruction[14:12];
                 rs1 <= instruction[19:15];
                 rs2 <= instruction[24:20];
-                imm12 <= {instruction[31], instruction[7], instruction[30:25], instruction[11:8], 1'b0};
+                imm12 <= {instruction[31], instruction[7], instruction[30:25], instruction[11:8]};
             end
 
         7'b0000011 , 7'b0010011 , 7'b1100111 , 7'b0000111: //Type I instruction

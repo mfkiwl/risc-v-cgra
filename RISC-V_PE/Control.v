@@ -33,6 +33,7 @@ input        mem_ack,
 // Signals to bus with register addresses
 output reg [4:0] rs1Out,
 output reg [4:0] rs2Out,
+output reg       read_en,  //Enable signal to read rs1 or rs2 values from the registers
 
 // Selection signal outputs for the 3 MUX and the ALU
 output reg [4:0] ALUsel,
@@ -63,6 +64,7 @@ reg [31:0] tempimmvalue = 0; //Fill with imm12 or immhi
 reg [31:0] tempAddress = 0; //For store operations
 reg dataReady_sync;
 reg ALUcomplete_sync;
+reg ALURes_sync;
 
 
 // Function definition 
@@ -99,7 +101,9 @@ initial begin
     Osel = 2'b00;
     dataReady_sync = 0;
     ALUcomplete_sync = 0;
+    ALURes_sync = 0;
     tempAddress = 0;
+    read_en = 0;
 end
 
 always @(posedge clk or posedge reset) 
@@ -108,7 +112,7 @@ begin
     begin
         //initialize values
         PCout <= 0;
-        ALUsel <= 0;
+        ALUsel <= 5'b11111;
         Asel <= 2'b00;
         Bsel <= 2'b00;
         Osel <= 2'b00;
@@ -125,8 +129,10 @@ begin
         mem_write <= 0;
         dataReady_sync <= 0;
         ALUcomplete_sync <= 0;
+        ALURes_sync <= 0;
         mem_address <= 0;
         tempAddress <= 0;
+        read_en = 0;
     
         reg_reset <= 0;
         IRenable <= 1;
@@ -135,6 +141,7 @@ begin
     begin
         dataReady_sync <= dataReady;
         ALUcomplete_sync <= ALUcomplete;
+        ALURes_sync <= ALURes;
 
     case(op)
     7'b0000011: // Op code 3 is load operations
@@ -147,9 +154,11 @@ begin
         PCout <= PCin; // By default, retain the same PC value
 
         rs1Out <= rs1;
-        reg_select <= 0; //Selects rs1 value to pull
+        reg_select <= 0; //Selects only rs1 value to pull
+        read_en <= 1;
         if (dataReady_sync)
         begin
+            read_en <= 0;
             Asel <= 2'b01; // Select data from bus as A input
             //immvalue <= (imm12[11] == 0) ? {20'b0, imm12} : {20'b11111111111111111111, imm12};
             immvalue <= sign_extend(imm12);
@@ -217,11 +226,13 @@ begin
         Benable <= 0;
         rs1Out <= rs1;
         reg_select <= 0;
+        read_en <= 1;
         reg_reset <= 0;
         dataReady_sync <= dataReady;
 
         if (dataReady_sync)
         begin
+            read_en <= 0;
             Asel <= 2'b01; //Select data comming from bus
             tempimmvalue = sign_extend(imm12);
             Bsel <= 2'b10; //Select immidiate value as B input
@@ -406,13 +417,14 @@ begin
         Benable <= 0;
         PCout <= PCin; // By default, retain the same PC value
         rs1Out <= rs1;
-        reg_select <= 0;
         rs2Out <= rs2;
         reg_select <= 1;
+        read_en <= 1;
         reg_reset <= 0;
 
         if (dataReady_sync)
         begin
+            read_en <= 0;
             Asel <= 2'b01; //Select data comming from bus
             Bsel <= 2'b01; //Select data comming from bus 
             // Enable registers to load value
@@ -624,8 +636,8 @@ begin
         reg_reset <= 1;
         reg_reset <= 0;
         rs1Out <= rs1;
-        reg_select <= 0; //Selects data from rs1 to pull 
-        //ALUsel <= 5'b11111;
+        reg_select <= 0; //Selects data only from rs1 to pull 
+        read_en <= 1;
         Asel = 2'b01; //Select data from bus
         Bsel <= 2'b10; //Select immidiate value as B input
         immvalue <= sign_extend(imm12);
@@ -637,6 +649,7 @@ begin
 
         if (dataReady_sync && tempAddress == 0)
         begin
+            read_en <= 0;
             // Enable registers to load value
             Aenable <= 1; 
             Benable <= 1;
@@ -662,7 +675,7 @@ begin
 
         else if (dataReady_sync && tempAddress != 0)
         begin
-
+            read_en <= 0;
             case(funct3)
             3'b000: //Store byte
                 begin
@@ -690,6 +703,112 @@ begin
                 PCout <= PCin + 1;
             end
         end
+    end
+
+    7'b1100011: //Case 99 is branch operations
+    begin
+        rdOut <= 0;
+        rdWrite <= 0;
+        Aenable <= 0;
+        Benable <= 0;
+        PCout <= PCin; // By default, retain the same PC value
+        Osel <= 0;
+        reg_reset <= 1;
+        reg_reset <= 0;
+        rs1Out <= rs1;
+        rs2Out <= rs2;
+        reg_select <= 1; //Selects both registers to pull
+        read_en <= 1;
+        Asel = 2'b01; //Select data from bus
+        Bsel <= 2'b01; //Select data from bus
+        tempimmvalue = sign_extend(imm12);
+        immvalue <= {tempimmvalue[30:0], 1'b0};
+
+        Aenable <= 1;
+        Benable <= 1;
+
+        if (dataReady_sync)
+        begin
+            Aenable <= 1;
+            Benable <= 1;
+
+            ALUsel <= 5'b00110;
+
+            if (ALUcomplete_sync && tempAddress == 0)
+            begin
+                ALUsel = 5'b11111;
+                case (funct3)
+                3'b000: //Case if =
+                begin
+                    if (ALURes == 32'b00000000000000000000000000000001)
+                    begin
+                        Asel <= 2'b10; //Select program counter
+                        Bsel <= 2'b10; //Select imm value
+                        Aenable <= 1;
+                        Benable <= 1;
+                        ALUsel <= 5'b00000; //Select add
+                        tempAddress <= 32'b00000000000000000000000000000001;
+                    end
+                end
+                3'b001: //Case if !=
+                begin
+                    if (ALURes == 32'b00000000000000000000000000000000)
+                    begin
+                        Asel <= 2'b10; //Select program counter
+                        Bsel <= 2'b10; //Select imm value
+                        Aenable <= 1;
+                        Benable <= 1;
+                        ALUsel <= 5'b00000; //Select add
+                        tempAddress <= 32'b00000000000000000000000000000001;
+                    end
+                end
+                endcase
+            end
+        end
+        if (!dataReady_sync && ALUcomplete_sync && tempAddress != 0)
+        begin
+            PCout <= ALURes;
+            Aenable <= 0;
+            Benable <= 0;
+        end
+    end
+
+    7'b1101111: // Op 111 is jump and link
+    begin
+        rdOut <= 0;
+        rdWrite <= 0;
+        Aenable <= 0;
+        Benable <= 0;
+        PCout <= PCin; // By default, retain the same PC value
+        //Osel <= 0;
+        reg_reset <= 1;
+        reg_reset <= 0;
+        Asel = 2'b10; //Select PC
+        Bsel <= 2'b10; //Select immvalue
+        tempimmvalue = (immhi[19] == 0) ? {12'b0, immhi} : {12'b111111111111, immhi};
+        immvalue <= {tempimmvalue[30:0], 1'b0};
+
+        Aenable <= 1;
+        Benable <= 1;
+
+
+        if (dataReady_sync)
+        begin
+            ALUsel = 5'b00000;
+            
+
+            if (ALUcomplete_sync)
+            begin
+                PCout <= ALURes;
+                $display("ALUResult: %b", ALURes);
+                rdOut <= rd;
+                rdWrite <= 1;
+                Osel = 2'b01; //Select A reg (PCin) as output *ommiting for now the + 4
+                //ALUsel = 5'b11111;
+                //Aenable <= 0;
+                //Benable <= 0;
+            end
+        end   
     end
 
     endcase

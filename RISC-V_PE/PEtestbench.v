@@ -21,6 +21,7 @@ wire [4:0] rdOut;
 wire rdWrite;
 wire mem_write;
 wire [31:0] result_out;
+wire read_en;
 wire [31:0] PCout;
 
 // Instantiate the processing element module
@@ -43,6 +44,7 @@ processing_element uut (
     .mem_write(mem_write),
     .result_out(result_out),
     .PCout(PCout),
+    .read_en(read_en),
     .reset(reset)
 );
 
@@ -1031,12 +1033,12 @@ initial begin
     BmuxIn = 32'b0;
     reset = 1;
 
-    #10; //Twentyeigth case ALU operands
+    #10; //Twentyeighth case ALU operands
     $display ("##############################################################################");
     $display ("############### Start of Load upper immidiate case ###################");
     $display ("##############################################################################");
     reset = 0;
-    PCin = 26; // Program counter input
+    PCin = 27; // Program counter input
     instruction = 32'b10110010110100101110_00001_0110111; //20 bit upper imm, rd = 1,  op = 55
     mem_ack = 0; // Memory acknowledgment signal
     data_Ready = 0; // Data ready signal
@@ -1053,6 +1055,108 @@ initial begin
         $display ("Result as expected");
     end
 
+    #10;
+    // Initialize inputs
+    PCin = 32'b0;
+    instruction = 32'b0;
+    mem_ack = 0;
+    data_Ready = 0;
+    AmuxIn = 32'b0;
+    BmuxIn = 32'b0;
+    reset = 1;
+
+    #10; //Twentyninth case ALU operands
+    $display ("##############################################################################");
+    $display ("############### Start of branch if equal ###################");
+    $display ("##############################################################################");
+    reset = 0;
+    PCin = 28; // Program counter input
+    instruction = 32'b1011001_01010_10101_000_11001_1100011; //12 bit imm value, rs1 = 10101, rs2 = 01010, funct3 = 000,  op = 99
+    mem_ack = 0; // Memory acknowledgment signal
+    data_Ready = 0; // Data ready signal
+    AmuxIn = 32'b01000001000000010000000011001000; // Data from bus to be loaded into A mux  
+    BmuxIn = 32'b01000001000000010000000011001000; // Data from bus to be loaded into B mux
+                     
+    #20;
+    data_Ready = 1;
+
+    #30;
+    data_Ready = 0;
+
+    #50;
+    //Expected result: 11111111111111111111101101010100
+    if (PCout == 32'b11111111111111111111101101010100) 
+    begin
+        $display ("Result as expected");
+    end
+
+    #10;
+    // Initialize inputs
+    PCin = 32'b0;
+    instruction = 32'b0;
+    mem_ack = 0;
+    data_Ready = 0;
+    AmuxIn = 32'b0;
+    BmuxIn = 32'b0;
+    reset = 1;
+
+    #10; //Thirtieth case ALU operands
+    $display ("##############################################################################");
+    $display ("############### Start of branch if not equal ###################");
+    $display ("##############################################################################");
+    reset = 0;
+    PCin = 29; // Program counter input
+    instruction = 32'b1011001_01010_10101_001_11001_1100011; //12 bit imm value, rs1 = 10101, rs2 = 01010, funct3 = 000,  op = 99
+    mem_ack = 0; // Memory acknowledgment signal
+    data_Ready = 0; // Data ready signal
+    AmuxIn = 32'b01000001000000010000000011001001; // Data from bus to be loaded into A mux  
+    BmuxIn = 32'b01000001000000010000000011001000; // Data from bus to be loaded into B mux
+                     
+    #20;
+    data_Ready = 1;
+
+    #30;
+    data_Ready = 0;
+
+    #50;
+    //Expected result: 11111111111111111111101101010101
+    if (PCout == 32'b11111111111111111111101101010101) 
+    begin
+        $display ("Result as expected");
+    end
+
+    #10;
+    // Initialize inputs
+    PCin = 32'b0;
+    instruction = 32'b0;
+    mem_ack = 0;
+    data_Ready = 0;
+    AmuxIn = 32'b0;
+    BmuxIn = 32'b0;
+    reset = 1;
+    
+
+    #10; //Thirtyfirst case ALU operands
+    $display ("##############################################################################");
+    $display ("############### Start of jump and link ###################");
+    $display ("##############################################################################");
+    reset = 0;
+    PCin = 30; // Program counter input
+    instruction = 32'b10110010101010101001_11001_1101111; //20 bit imm value, rd = 11001,  op = 111
+    mem_ack = 0; // Memory acknowledgment signal
+    data_Ready = 0; // Data ready signal      
+
+    #20;
+    data_Ready = 1;            
+
+    #40;
+    //Expected result: 11111111111110101001001100101010
+    //        +        00000000000000000000000000011110
+    //                 11111111111110101001001101001000
+    if (PCout == 32'b11111111111110101001001101001000) 
+    begin
+        $display ("Result as expected");
+    end
 
     // End the simulation
     $finish;

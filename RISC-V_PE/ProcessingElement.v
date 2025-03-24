@@ -25,6 +25,7 @@ module processing_element (
     output rdWrite,
     output mem_write,
     output [31:0] result_out,  // Output selected from output mux
+    output read_en,            // Read enable to take data from rs1 and rs2
     output [31:0] PCout
 );
 
@@ -99,6 +100,7 @@ module processing_element (
         .rdWrite(rdWrite),
         .mem_read(mem_read),
         .mem_write(mem_write),
+        .read_en(read_en),
         .reset(reset) 
     );
 

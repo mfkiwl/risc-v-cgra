@@ -51,7 +51,6 @@ Subtraction subtractor (
                ALU_Out <= add_result;
                ALUcomplete <= 1;
                Cout <= add_carry_out;
-               //ALU_Out = A + B;
             end
             5'b00001: // Subtraction
             begin
@@ -86,10 +85,18 @@ Subtraction subtractor (
                ALU_Out <= A >> B;
                ALUcomplete <= 1;
             end
-            5'b00110: // Rotate left
+            5'b00110: // Compare if equal
             begin
-               ALU_Out <= {A[30:0], A[31]};
-               ALUcomplete <= 1;
+               if (A == B)
+               begin
+                  ALU_Out <= 32'b00000000000000000000000000000001;;
+                  ALUcomplete <= 1;
+               end
+               else
+               begin
+                  ALU_Out <= 32'b00000000000000000000000000000000;;
+                  ALUcomplete <= 1;
+               end
             end
             5'b00111: // Rotate right
             begin
