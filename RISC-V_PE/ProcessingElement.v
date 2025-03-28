@@ -18,7 +18,6 @@ module processing_element (
     output [31:0] mem_address, // Address for memory operations (store)
     output reg_select,         // Signal to select proper register to read
     output mem_read,           // Memory read signal     
-    output [31:0] messReg,     // Register for message data
     output [4:0] rs1Out,       // Register Address to be read
     output [4:0] rs2Out,      
     output [4:0] rdOut,

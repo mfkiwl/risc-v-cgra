@@ -13,8 +13,9 @@ module register_system (
     input [31:0] data_in,               // 32-bit input data for write operations
     input rdwrite,                      // Write enable signal
     input read_en,                      // Read enable for output
-    output wire [31:0] data_out1,        // 32-bit output data for read operations
-    output wire [31:0] data_out2         // 32-bit output data for read operations
+    output wire [31:0] data_out1,       // 32-bit output data for read operations
+    output wire [31:0] data_out2,       // 32-bit output data for read operations
+    output wire        regComplete      // Indicates read operation is complete
 );
 
     // Internal wires and registers
@@ -61,7 +62,7 @@ module register_system (
         .in_25(reg_out[24]), .in_26(reg_out[25]), .in_27(reg_out[26]), .in_28(reg_out[27]),
         .in_29(reg_out[28]), .in_30(reg_out[29]), .in_31(reg_out[30]), .in_32(reg_out[31]),
         .selrs1(selRS1), .selrs2(selRS2), .reg_select(reg_select),
-        .data_out1(data_out1), .data_out2(data_out2), .read_en(read_en)
+        .data_out1(data_out1), .data_out2(data_out2), .read_en(read_en), .regComplete(regComplete)
     );
 
     always @(posedge clk ) begin

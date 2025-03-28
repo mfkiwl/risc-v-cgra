@@ -36,17 +36,14 @@ module mux32_1 (
     input             reg_select,
     input             read_en,
     output reg [31:0] data_out1,
-    output reg [31:0] data_out2
+    output reg [31:0] data_out2,
+    output reg        regComplete
 );
     always @(*) begin
         if (read_en == 1)
         begin
         case(selrs1)
-            5'b00000: 
-            begin
-                data_out1 = in_1;
-                $display("Data read at Reg 0: %h", in_1);
-            end 
+            5'b00000: data_out1 = in_1;
             5'b00001: data_out1 = in_2; 
             5'b00010: data_out1 = in_3; 
             5'b00011: data_out1 = in_4; 
@@ -60,11 +57,7 @@ module mux32_1 (
             5'b01011: data_out1 = in_12; 
             5'b01100: data_out1 = in_13; 
             5'b01101: data_out1 = in_14; 
-            5'b01110: 
-            begin
-                data_out1 = in_15; 
-                $display("Data read at Reg 14: %h", in_15);
-            end
+            5'b01110: data_out1 = in_15; 
             5'b01111: data_out1 = in_16; 
             5'b10000: data_out1 = in_17; 
             5'b10001: data_out1 = in_18; 
@@ -130,12 +123,14 @@ module mux32_1 (
         begin
             data_out2 = 32'bxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx;
         end
+            regComplete <=1;
         end
 
         else
         begin
             data_out1 = 32'bxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx;
             data_out2 = 32'bxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx;
+            regComplete <=0;
         end
     end
 

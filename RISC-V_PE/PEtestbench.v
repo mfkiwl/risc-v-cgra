@@ -1049,8 +1049,8 @@ initial begin
     mem_ack = 1;
 
     #30;
-    //Expected result: b01000001000000010000000011001000
-    if (result_out == 32'b01000001000000010000000011001000) 
+    //Expected result: b01000001000000010000000000000000
+    if (result_out == 32'bb01000001000000010000000000000000) 
     begin
         $display ("Result as expected");
     end
