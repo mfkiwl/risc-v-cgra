@@ -5,14 +5,13 @@ module PE_system (
     input clk,
     input reset,
     input grant,      //Grant signal from the arbiter
-    input [31:0] PCinBus,    //Program counter being sent to the PE
+    input [31:0] PCin,    //Program counter being sent to the PE
     input [31:0] instructionBus, //Instruction loaded into PE
     input [31:0] AmuxBus,    //Data being sent to A mux
     input [31:0] BmuxBus,    //Data being sent to B mux
     input        mem_ackBus, //Memory acknowledgment signal coming from the global memory
     input        data_ReadyBus, //register read complete
     input [31:0] memData,      //Data coming from global memory
-    input        instrWrite,    //Signal from controller to write instruction into PE
     output [31:0] mem_addressBus,  //mem_Address sent to bus for global memory
     output [31:0] result_outBus,   //result_out sent to bus
     output [31:0] PCoutBus,        //new program counter to be sent to the controller
@@ -42,8 +41,6 @@ module PE_system (
     wire       read_enPE;       //Signal to read from local memory
 
     //Outputs to the PE
-    wire [31:0] PCinPE;    //Program counter being sent to the PE
-    wire [31:0] instructionPE; //Instruction loaded into PE
     wire [31:0] AmuxPE;    //Data being sent to A mux
     wire [31:0] BmuxPE;    //Data being sent to B mux
     wire        mem_ackPE; //Memory acknowledgment signal into the PE
@@ -52,8 +49,8 @@ module PE_system (
     //Instantiate the PE
     processing_element PE(
         .clk(clk),
-        .PCin(PCinPE),         // Program counter coming from bus, into muxA and into controller
-        .instruction(instructionPE),  // Input instruction to IR            
+        .PCin(PCin),         // Program counter coming from bus, into muxA and into controller
+        .instruction(instructionBus),  // Input instruction to IR            
         .mem_ack(mem_ackPE),             // Memory acknowledgment signal from bus
         .data_Ready(data_ReadyPE),          // Data ready signal from bus
         .AmuxIn(AmuxPE),       // Data from bus to be loaded into A mux
@@ -87,8 +84,6 @@ module PE_system (
         .mem_writePE(mem_writePE),
         .rd_writePE(rd_writePE),
         .read_enPE(read_enPE),
-        .PCinPE(PCinPE),
-        .instructionPE(instructionPE),
         .AmuxPE(AmuxPE),
         .BmuxPE(BmuxPE),
         .mem_ackPE(mem_ackPE),
@@ -106,14 +101,11 @@ module PE_system (
         .mem_writeBus(mem_writeBus),
         .rd_writeBus(rd_writeBus),
         .read_enBus(read_enBus),
-        .PCinBus(PCinBus),
-        .instructionBus(instructionBus),
         .AmuxBus(AmuxBus),
         .BmuxBus(BmuxBus),
         .mem_ackBus(mem_ackBus),
         .data_ReadyBus(data_ReadyBus),
         .memData(memData),
-        .instrWrite(instrWrite)
     );
 endmodule
 

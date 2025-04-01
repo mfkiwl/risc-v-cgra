@@ -1,0 +1,194 @@
+$date
+	Mon Mar 31 23:38:01 2025
+$end
+$version
+	Icarus Verilog
+$end
+$timescale
+	1ps
+$end
+$scope module tb_cluster_controller $end
+$var wire 128 ! instruction_outPE [127:0] $end
+$var wire 128 " PCsIM [127:0] $end
+$var wire 128 # PCinPE [127:0] $end
+$var wire 4 $ InstReadEn [3:0] $end
+$var reg 128 % PCoutPE [127:0] $end
+$var reg 1 & clk $end
+$var reg 4 ' execution_complete [3:0] $end
+$var reg 128 ( instruction_mem [127:0] $end
+$var reg 1 ) reset $end
+$scope module uut $end
+$var wire 128 * PCoutPE [127:0] $end
+$var wire 1 & clk $end
+$var wire 4 + execution_complete [3:0] $end
+$var wire 128 , instruction_mem [127:0] $end
+$var wire 1 ) reset $end
+$var reg 4 - InstReadEn [3:0] $end
+$var reg 128 . PCinPE [127:0] $end
+$var reg 128 / PCinTemp [127:0] $end
+$var reg 128 0 PCsIM [127:0] $end
+$var reg 96 1 PCsPending [95:0] $end
+$var reg 32 2 current_pc [31:0] $end
+$var reg 4 3 dependency [3:0] $end
+$var reg 128 4 instructionTemp [127:0] $end
+$var reg 128 5 instruction_outPE [127:0] $end
+$var reg 96 6 instructionsPending [95:0] $end
+$var reg 1 7 program_start $end
+$var reg 32 8 temp_current_pc [31:0] $end
+$scope function register_extraction $end
+$var reg 32 9 instruction [31:0] $end
+$var reg 7 : opcode [6:0] $end
+$var reg 5 ; rd [4:0] $end
+$var reg 5 < rs1 [4:0] $end
+$var reg 5 = rs2 [4:0] $end
+$upscope $end
+$scope task dependency_check $end
+$var reg 4 > dependency_flags [3:0] $end
+$var reg 128 ? instructions [127:0] $end
+$var reg 5 @ rdop1 [4:0] $end
+$var reg 5 A rdop2 [4:0] $end
+$var reg 5 B rdop3 [4:0] $end
+$var reg 5 C rdop4 [4:0] $end
+$var reg 15 D regs1 [14:0] $end
+$var reg 15 E regs2 [14:0] $end
+$var reg 15 F regs3 [14:0] $end
+$var reg 15 G regs4 [14:0] $end
+$var reg 5 H rs1op1 [4:0] $end
+$var reg 5 I rs1op2 [4:0] $end
+$var reg 5 J rs1op3 [4:0] $end
+$var reg 5 K rs1op4 [4:0] $end
+$var reg 5 L rs2op1 [4:0] $end
+$var reg 5 M rs2op2 [4:0] $end
+$var reg 5 N rs2op3 [4:0] $end
+$var reg 5 O rs2op4 [4:0] $end
+$upscope $end
+$upscope $end
+$upscope $end
+$enddefinitions $end
+$comment Show the parameter values. $end
+$dumpall
+$end
+#0
+$dumpvars
+bx O
+bx N
+bx M
+bx L
+bx K
+bx J
+bx I
+bx H
+bx G
+bx F
+bx E
+bx D
+bx C
+bx B
+bx A
+bx @
+bx ?
+bx >
+bx =
+bx <
+bx ;
+bx :
+bx 9
+bx 8
+17
+b0 6
+b0 5
+b0 4
+b0 3
+b0 2
+bx 1
+b0 0
+b0 /
+b0 .
+b0 -
+b0 ,
+bx +
+bx *
+1)
+b0 (
+bx '
+0&
+bx %
+b0 $
+b0 #
+b0 "
+b0 !
+$end
+#5000
+1&
+#10000
+0&
+0)
+#15000
+b1111 $
+b1111 -
+b11000000000000000000000000000000100000000000000000000000000000000100000000000000000000000000000000 "
+b11000000000000000000000000000000100000000000000000000000000000000100000000000000000000000000000000 0
+1&
+#20000
+0&
+b101001001000010110110011000000000111001100000100001100110000000001000001000000101011001100000000000100000000000110110011 (
+b101001001000010110110011000000000111001100000100001100110000000001000001000000101011001100000000000100000000000110110011 ,
+#25000
+07
+b11 2
+b11000000000000000000000000000000100000000000000000000000000000000100000000000000000000000000000000 #
+b11000000000000000000000000000000100000000000000000000000000000000100000000000000000000000000000000 .
+b101001001000010110110011000000000111001100000100001100110000000001000001000000101011001100000000000100000000000110110011 !
+b101001001000010110110011000000000111001100000100001100110000000001000001000000101011001100000000000100000000000110110011 5
+b0 $
+b0 -
+b0 >
+b1010 O
+b1001 K
+b1011 C
+b111 N
+b110 J
+b1000 B
+b100 M
+b10 I
+b101 A
+b1 L
+b0 H
+b11 @
+b10110100101010 G
+b10000011000111 F
+b1010001000100 E
+b110000000001 D
+b1010 =
+b1001 <
+b1011 ;
+b110011 :
+b101001001000010110110011 9
+b101001001000010110110011000000000111001100000100001100110000000001000001000000101011001100000000000100000000000110110011 ?
+1&
+#30000
+0&
+#35000
+1&
+#40000
+0&
+#45000
+1&
+#50000
+0&
+#55000
+1&
+#60000
+0&
+#65000
+1&
+#70000
+0&
+#75000
+1&
+#80000
+0&
+#85000
+1&
+#90000
+0&

@@ -15,8 +15,6 @@ module bus_interface (
     input       read_enPE,       //Signal to read from local memory
 
     //Outputs to the PE
-    output reg [31:0] PCinPE,    //Program counter being sent to the PE
-    output reg [31:0] instructionPE, //Instruction loaded into PE
     output reg [31:0] AmuxPE,    //Data being sent to A mux
     output reg [31:0] BmuxPE,    //Data being sent to B mux
     output reg        mem_ackPE, //Memory acknowledgment signal into the PE
@@ -36,14 +34,11 @@ module bus_interface (
     output reg       mem_writeBus,     //Signal to write to global memory
     output reg       rd_writeBus,      //Signal to write to local memory
     output reg       read_enBus,
-    input [31:0] PCinBus,    //Program counter being sent to the PE
-    input [31:0] instructionBus, //Instruction loaded into PE
     input [31:0] AmuxBus,    //Data being sent to A mux
     input [31:0] BmuxBus,    //Data being sent to B mux
     input        mem_ackBus, //Memory acknowledgment signal coming from the global memory
     input        data_ReadyBus, //register read complete
     input [31:0] memData,      //Data coming from global memory
-    input        instrWrite    //Signal from controller to write instruction into PE
 );
 
     reg active; // Keep track of the bus request state
@@ -51,8 +46,6 @@ module bus_interface (
     always @(posedge clk or posedge reset) begin
         if (reset) begin
             bus_request <= 0;
-            PCinPE <= 0;
-            instructionPE <= 0;
             AmuxPE <= 0;
             BmuxPE <= 0;
             mem_ackPE <= 0;
@@ -70,7 +63,7 @@ module bus_interface (
             read_enBus <= 0;
             active <= 0;
         end else begin
-            if ((mem_readPE || mem_writePE || rd_writePE || read_enPE || instrWrite) && !active) begin
+            if ((mem_readPE || mem_writePE || rd_writePE || read_enPE) && !active) begin
                 bus_request <= 1; // Request the bus
             end
             if (grant) begin
@@ -103,11 +96,6 @@ module bus_interface (
                 active <= 1;
             end
             if (active) begin
-                PCinPE <= PCinBus;
-                if (instrWrite)
-                begin
-                    instructionPE <= instructionBus;
-                end
                 if (mem_ackBus)
                 begin
                     AmuxPE <= memData;

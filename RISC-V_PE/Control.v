@@ -54,10 +54,10 @@ output reg       reg_reset, //Reset signal for registers
 output reg        mem_read, // If mem_read is 1, value from the output of the PE is a memory address that must be read
 output reg        mem_write, //Indicates to bus that value in output must be written to indicated address
 output reg [31:0] mem_address, // used for store operations. Stores in memory
-output reg        reg_select, // Selects rs1 or rs2 when reading from registers
-//output reg      req,        //request signal sent to the arbiter
+output reg        reg_select, // Selects rs1 or rs2 when reading from register
 
-output reg [31:0] immvalue //Value being wired to reg B mux
+output reg [31:0] immvalue, //Value being wired to reg B mux
+output reg        execution_complete //Indicates end of processing
 );
 
 // Internal signals
@@ -82,7 +82,7 @@ reg ALURes_sync;
             Osel <= Oselection;
             rdOut <= dest_reg;
             rdWrite <= 1;
-            PCout <= PCin + 1;
+            execution_complete <= 1;
         end
     endtask
 
@@ -105,6 +105,7 @@ initial begin
     ALURes_sync = 0;
     tempAddress = 0;
     read_en = 0;
+    execution_complete = 0;
     //req = 0;
 end
 
@@ -134,7 +135,8 @@ begin
         ALURes_sync <= 0;
         mem_address <= 0;
         tempAddress <= 0;
-        read_en = 0;
+        read_en <= 0;
+        execution_complete <= 0;
         //req = 0;
     
         reg_reset <= 0;
@@ -156,6 +158,7 @@ begin
         Benable <= 0;
         //req <= 0;
         PCout <= PCin; // By default, retain the same PC value
+        execution_complete <= 0;
 
         rs1Out <= rs1;
         reg_select <= 0; //Selects only rs1 value to pull
@@ -215,7 +218,7 @@ begin
                     endcase
                     rdOut <= rd; 
                     rdWrite <= 1; //Send signal to write output value into rd register
-                    PCout <= PCin + 1;
+                    execution_complete <= 1;
                     //req <= 1;
                 end
             end     
@@ -258,7 +261,6 @@ begin
                     //Osel <= 2'b00;
                     //rdOut <= rd;
                     //rdWrite <= 1;
-                    //PCout <= PCin + 1;
                     complete_operation(2'b00,rd);
                     //req <= 1;
                 end
@@ -279,7 +281,6 @@ begin
                     //Osel <= 2'b00;
                     //rdOut <= rd;
                     //rdWrite <= 1;
-                   // PCout <= PCin + 1;
                    complete_operation(2'b00,rd);
                    //req <= 1;
                 end
@@ -300,7 +301,6 @@ begin
                     //Osel <= 2'b00;
                     //rdOut <= rd;
                     //rdWrite <= 1;
-                    //PCout <= PCin + 1;
                     complete_operation(2'b00,rd);
                     //req <= 1;
                 end
@@ -321,7 +321,6 @@ begin
                     //Osel <= 2'b00;
                     //rdOut <= rd;
                     //rdWrite <= 1;
-                    //PCout <= PCin + 1;
                     complete_operation(2'b00,rd);
                     //req <= 1;
                 end
@@ -342,7 +341,6 @@ begin
                     //Osel <= 2'b00;
                     //rdOut <= rd;
                     //rdWrite <= 1;
-                    //PCout <= PCin + 1;
                     complete_operation(2'b00,rd);
                     //req <= 1;
                 end
@@ -372,7 +370,6 @@ begin
                     //Osel <= 2'b00;
                     //rdOut <= rd;
                     //rdWrite <= 1;
-                    //PCout <= PCin + 1;
                     complete_operation(2'b00,rd);
                     //req <= 1;
                 end
@@ -393,7 +390,6 @@ begin
                     //Osel <= 2'b00;
                     //rdOut <= rd;
                     //rdWrite <= 1;
-                    //PCout <= PCin + 1;
                     complete_operation(2'b00,rd);
                     //req <= 1;
                 end
@@ -414,7 +410,6 @@ begin
                     //Osel <= 2'b00;
                     //rdOut <= rd;
                     //rdWrite <= 1;
-                    //PCout <= PCin + 1;
                     complete_operation(2'b00,rd);
                     //req <= 1;
                 end
@@ -436,6 +431,7 @@ begin
         reg_select <= 1;
         read_en <= 1;
         reg_reset <= 0;
+        execution_complete <= 0;
 
         if (dataReady_sync)
         begin
@@ -462,7 +458,6 @@ begin
                     //Osel <= 2'b00;
                     //rdOut <= rd;
                     //rdWrite <= 1;
-                    //PCout <= PCin + 1;
                     complete_operation(2'b00, rd);
                     //req <= 1;
                 end
@@ -482,7 +477,6 @@ begin
                     //Osel <= 2'b00;
                     //rdOut <= rd;
                     //rdWrite <= 1;
-                    //PCout <= PCin + 1;
                     complete_operation(2'b00,rd);
                     //req <= 1;
                 end
@@ -501,7 +495,6 @@ begin
                     //Osel <= 2'b00;
                     //rdOut <= rd;
                     //rdWrite <= 1;
-                    //PCout <= PCin + 1;
                     complete_operation(2'b00,rd);
                     //req <= 1;
                 end
@@ -520,7 +513,6 @@ begin
                     //Osel <= 2'b00;
                     //rdOut <= rd;
                     //rdWrite <= 1;
-                    //PCout <= PCin + 1;
                     complete_operation(2'b00,rd);
                     //req <= 1;
                 end
@@ -539,7 +531,6 @@ begin
                     //Osel <= 2'b00;
                     //rdOut <= rd;
                     //rdWrite <= 1;
-                    //PCout <= PCin + 1;
                     complete_operation(2'b00,rd);
                     //req <= 1;
                 end
@@ -567,7 +558,7 @@ begin
                     Osel <= 2'b00;
                     rdOut <= rd;
                     rdWrite <= 1;
-                    PCout <= PCin + 1;
+                    execution_complete <= 1;
                     //complete_operation(2'b00,rd);
                     //req <= 1;
                 end
@@ -586,7 +577,6 @@ begin
                     //Osel <= 2'b00;
                     //rdOut <= rd;
                     //rdWrite <= 1;
-                    //PCout <= PCin + 1;
                     complete_operation(2'b00, rd);
                     //req <= 1;
                 end
@@ -605,7 +595,6 @@ begin
                     //Osel <= 2'b00;
                     //rdOut <= rd;
                     //rdWrite <= 1;
-                    //PCout <= PCin + 1; 
                     complete_operation(2'b00,rd);
                     //req <= 1;
                 end
@@ -622,6 +611,7 @@ begin
         Aenable <= 0;
         Benable <= 0;
         PCout <= PCin; // By default, retain the same PC value
+        execution_complete <= 0;
         //req <= 0;
 
         reg_reset <= 0;
@@ -645,7 +635,7 @@ begin
             rdOut <= rd; 
             rdWrite <= 1; //Send signal to write output value into rd register
             mem_read <= 0; //Reset the memory read signal
-            PCout <= PCin + 1;
+            execution_complete <= 1;
             //req <= 1;
         end
     end
@@ -657,6 +647,7 @@ begin
         Aenable <= 0;
         Benable <= 0;
         PCout <= PCin; // By default, retain the same PC value
+        execution_complete <= 0;
         //req <= 0;
         Osel <= 0;
         reg_reset <= 1;
@@ -727,7 +718,7 @@ begin
             begin
                 mem_address <= tempAddress; //Use the calculated destination address to store the value
                 mem_write <= 1; //Indicates that value at output will be stored at mem_address
-                PCout <= PCin + 1;
+                execution_complete <= 1;
                 //req <= 1;
             end
         end
@@ -740,6 +731,7 @@ begin
         Aenable <= 0;
         Benable <= 0;
         PCout <= PCin; // By default, retain the same PC value
+        execution_complete <= 0;
         //req <= 0;
         Osel <= 0;
         reg_reset <= 1;
@@ -797,6 +789,7 @@ begin
         if (!dataReady_sync && ALUcomplete_sync && tempAddress != 0)
         begin
             PCout <= ALURes;
+            execution_complete <= 1;
             //req <= 1;
             Aenable <= 0;
             Benable <= 0;
@@ -810,6 +803,7 @@ begin
         Aenable <= 0;
         Benable <= 0;
         PCout <= PCin; // By default, retain the same PC value
+        execution_complete <= 0;
         //req <= 0;
         //Osel <= 0;
         reg_reset <= 1;
@@ -831,6 +825,7 @@ begin
             if (ALUcomplete_sync)
             begin
                 PCout <= ALURes;
+                execution_complete <= 1;
                 //req <= 1;
                 rdOut <= rd;
                 rdWrite <= 1;

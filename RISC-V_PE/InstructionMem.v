@@ -33,5 +33,8 @@ module instruction_memory (
             instruction[127:96] <= memory_array[PC[127:96]]; // PE 3
         else
             instruction[127:96] <= 32'b0;
+
+        if (read_enable == 4'b0)
+            instruction <= 128'b0; 
     end
 endmodule
