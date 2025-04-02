@@ -218,68 +218,65 @@ module cluster_controller (
                                 current_pc = PCoutPE[127:96];
                             end
                         end
-                        else
+                        PCsIM = {current_pc + 32'd3, current_pc + 32'd2, current_pc + 32'd1, current_pc};
+                        InstReadEn <= 4'b1111;
+                        instructionTemp <= 0;
+                        dependency <= 0;
+                        if (instruction_mem != 0)
                         begin
-                            PCsIM = {current_pc + 32'd3, current_pc + 32'd2, current_pc + 32'd1, current_pc};
-                            InstReadEn <= 4'b1111;
-                            instructionTemp <= 0;
-                            dependency <= 0;
-                            if (instruction_mem != 0)
+                            InstReadEn <= 0;
+                            dependency_check(instruction_mem, dependency);
+                            $display("Dependency: %b", dependency);
+                            if (dependency == 0)
                             begin
-                                InstReadEn <= 0;
-                                dependency_check(instruction_mem, dependency);
-                                $display("Dependency: %b", dependency);
-                                if (dependency == 0)
+                                $display("No dependency");
+                                instruction_outPE <= instruction_mem;
+                                PCinPE <= PCsIM;
+                                current_pc <= current_pc + 3;
+                            end
+                            else 
+                            begin
+                                instructionTemp[31:0] = instruction_mem[31:0];
+                                PCinTemp[31:0] = PCsIM[31:0];
+                                if (dependency[1] != 1'b1)
                                 begin
-                                    $display("No dependency");
-                                    instruction_outPE <= instruction_mem;
-                                    PCinPE <= PCsIM;
-                                    current_pc <= current_pc + 3;
+                                    $display("There is no dependency on the second operation");
+                                    instructionTemp[63:32] = instruction_mem[63:32];
+                                    PCinTemp[63:32] = PCsIM[63:32];
+                                    temp_current_pc = current_pc + 1;
                                 end
-                                else 
+                                else
                                 begin
-                                    instructionTemp[31:0] = instruction_mem[31:0];
-                                    PCinTemp[31:0] = PCsIM[31:0];
-                                    if (dependency[1] != 1'b1)
-                                    begin
-                                        $display("There is no dependency on the second operation");
-                                        instructionTemp[63:32] = instruction_mem[63:32];
-                                        PCinTemp[63:32] = PCsIM[63:32];
-                                        temp_current_pc = current_pc + 1;
-                                    end
-                                    else
-                                    begin
-                                        instructionsPending[31:0] = instruction_mem[63:32];
-                                        PCsPending[31:0] = PCsIM[63:32];
-                                    end
-                                    if (dependency[2] != 1'b1)
-                                    begin
-                                        $display("There is no dependency on the third operation");
-                                        instructionTemp[95:64] = instruction_mem[95:64];
-                                        PCinTemp[95:64] = PCsIM[95:64];
-                                        temp_current_pc = current_pc + 2;
-                                    end
-                                    else
-                                    begin
-                                        instructionsPending[63:32] = instruction_mem[95:64];
-                                        PCsPending[63:32] = PCsIM[95:64];
-                                    end
-                                    if (dependency[3] != 1'b1)
-                                    begin
-                                        $display("There is no dependency on the fourth operation");
-                                        instructionTemp[127:96] = instruction_mem[127:96];
-                                        PCinTemp[127:96] = PCsIM[127:96];
-                                        temp_current_pc = current_pc + 3;
-                                    end
-                                    else
-                                    begin
-                                        instructionsPending[95:64] = instruction_mem[127:96];
-                                        PCsPending[95:64] = PCsIM[127:96];
-                                    end
-                                    instruction_outPE <= instructionTemp;
-                                    PCinPE <= PCinTemp;
-                                    current_pc = temp_current_pc;
+                                    instructionsPending[31:0] = instruction_mem[63:32];
+                                    PCsPending[31:0] = PCsIM[63:32];
                                 end
+                                if (dependency[2] != 1'b1)
+                                begin
+                                    $display("There is no dependency on the third operation");
+                                    instructionTemp[95:64] = instruction_mem[95:64];
+                                    PCinTemp[95:64] = PCsIM[95:64];
+                                    temp_current_pc = current_pc + 2;
+                                end
+                                else
+                                begin
+                                    instructionsPending[63:32] = instruction_mem[95:64];
+                                    PCsPending[63:32] = PCsIM[95:64];
+                                end
+                                if (dependency[3] != 1'b1)
+                                begin
+                                    $display("There is no dependency on the fourth operation");
+                                    instructionTemp[127:96] = instruction_mem[127:96];
+                                    PCinTemp[127:96] = PCsIM[127:96];
+                                    temp_current_pc = current_pc + 3;
+                                end
+                                else
+                                begin
+                                    instructionsPending[95:64] = instruction_mem[127:96];
+                                    PCsPending[95:64] = PCsIM[127:96];
+                                end
+                                instruction_outPE <= instructionTemp;
+                                PCinPE <= PCinTemp;
+                                current_pc = temp_current_pc;
                             end
                         end
                     end

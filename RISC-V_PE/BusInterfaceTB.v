@@ -19,9 +19,9 @@ module tb_bus_interface;
     reg mem_writePE;
     reg rd_writePE;
     reg read_enPE;
+    reg execution_completePE;
 
     // Outputs to the PE
-    wire [31:0] PCinPE;
     wire [31:0] AmuxPE;
     wire [31:0] BmuxPE;
     wire mem_ackPE;
@@ -41,7 +41,7 @@ module tb_bus_interface;
     wire mem_writeBus;
     wire rd_writeBus;
     wire read_enBus;
-    reg [31:0] PCinBus;
+    wire execution_completeBus;
     reg [31:0] AmuxBus;
     reg [31:0] BmuxBus;
     reg mem_ackBus;
@@ -63,7 +63,6 @@ module tb_bus_interface;
         .mem_writePE(mem_writePE),
         .rd_writePE(rd_writePE),
         .read_enPE(read_enPE),
-        .PCinPE(PCinPE),
         .AmuxPE(AmuxPE),
         .BmuxPE(BmuxPE),
         .mem_ackPE(mem_ackPE),
@@ -81,12 +80,13 @@ module tb_bus_interface;
         .mem_writeBus(mem_writeBus),
         .rd_writeBus(rd_writeBus),
         .read_enBus(read_enBus),
-        .PCinBus(PCinBus),
         .AmuxBus(AmuxBus),
         .BmuxBus(BmuxBus),
         .mem_ackBus(mem_ackBus),
         .data_ReadyBus(data_ReadyBus),
         .memData(memData),
+        .execution_completeBus(execution_completeBus),
+        .execution_completePE(execution_completePE)
     );
 
     // Clock generation
@@ -101,8 +101,8 @@ module tb_bus_interface;
         $dumpfile("tb_bus_interface.vcd");
         $dumpvars(0, tb_bus_interface);
 
-        $monitor("Time: %0dns | PCout: %d | mem_address: %b | reg_select: %b | mem_read: %b | mem_write: %b | rs1: %b | rs2: %b | rd: %b | rd_Write: %b | result_out: %b | PCinPE: %d | AmuxPE: %b | BmuxPE: %b | mem_ackPE: %b | data_ReadyPE: %b", 
-                 $time, PCoutBus, mem_addressBus, reg_selectBus, mem_readBus, mem_writeBus, rs1OutBus, rs2OutBus, rdOutBus, rd_writeBus, result_outBus, PCinPE, AmuxPE, BmuxPE, mem_ackPE, data_ReadyPE);
+        $monitor("Time: %0dns | PCout: %d | mem_address: %b | reg_select: %b | mem_read: %b | mem_write: %b | rs1: %b | rs2: %b | rd: %b | rd_Write: %b | result_out: %b | AmuxPE: %b | BmuxPE: %b | mem_ackPE: %b | data_ReadyPE: %b", 
+                 $time, PCoutBus, mem_addressBus, reg_selectBus, mem_readBus, mem_writeBus, rs1OutBus, rs2OutBus, rdOutBus, rd_writeBus, result_outBus, AmuxPE, BmuxPE, mem_ackPE, data_ReadyPE);
 
 
         // Initialize signals

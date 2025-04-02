@@ -1,88 +1,126 @@
-`include BusArbiter.v
-`include BusInterface.v
-`include ProcessingElement.v
-`include DataRegs.v
+`include "BusArbiter.v"
+`include "ClusterControl.v"
+`include "PEInterface.v"
+`include "DataRegs.v"
+`include "InstructionMem.v"
 
-module local_bus (
-    input clk,
-    input reset,
-    input [31:0] address [3:0],   // Addresses from the 4 PEs. 
-    //PE inputs
-    //input [3:0] mem_read,         // Read signals from the 4 PEs to global mem
-    //input [3:0] mem_write,        // Write signals from the 4 PEs to global mem
-    input [3:0] rd_write,         // write signal to local mem
-    input [3:0] read_en,          // read signal to local mem
-    input [3:0] reg_select,       // reg select signals for local mem read
-    input [31:0] PCout [3:0],     // Program counter for local program memory
-    input [31:0] result_in [3:0], // Data to be written by the PEs (result_out signal)
-    input [4:0] rs1Out [3:0],     // Select signal for mux coming from PE
-    input [4:0] rs2Out [3:0],     // Select signal for mux coming from PE
-    input [4:0] rdOut [3:0],      // Select signal for demux coming from PE
-    //LocalMem inputs
-    input [31:0] data_out1,
-    input [31:0] data_out2,       // Data coming from local registers
-    //Instruction mem inputs
-    input [31:0] instructions [3:0], //Four instructions read from instruction memory to load into PEs
-    output [31:0] Amux_in [3:0],  // Data read from local memory to the PEs to mux A
-    output [31:0] Bmux_in [3:0],  // Data read from local memory to the PEs to mux B
-    output [31:0] instruction [3:0], // Instruction sent to each PE
-    output [31:0] PC_in [3:0],    // Program counter
-    output [3:0] mem_ack,
-    output [3:0] data_Ready
+module local_bus_top (
+    input clk,                     // Clock signal
+    input reset,                   // Reset signal
+    // Outputs for global memory (cluster outputs for now)
+    output [31:0] global_mem_address,
+    output [31:0] global_mem_write_data, //Data output from PEs to write to memory
+    input [31:0] global_mem_read_data,
+    input        global_mem_ack,
+    output global_mem_write,
+    output global_mem_read,
+    output [127:0] result_out
 );
 
-    wire [3:0] bus_req;           // Request signals from PEs
-    wire [3:0] grant;             // Grant signals from arbiter
-    wire [3:0] mem_read;          // Global read signal wired to cluster output
-    wire [3:0] mem_write;         // Global write signal wired to cluster output
+    // Internal signals for the interconnections
+    wire [127:0] PCsIM;            // Program counters for instruction memory
+    wire [3:0] InstReadEn;         // Read enable signals for instruction memory
+    wire [127:0] PCinPE;           // Program counters to PEs
+    wire [127:0] PCoutPE;          // Program counters from PEs
+    wire [127:0] instruction_outPE; // Instructions loaded into PEs
+    wire [127:0] instruction_mem;  // Instructions from instruction memory
+    wire [3:0] execution_complete; // PE execution completion flags
+    wire [3:0] bus_request;        // Bus request signals from PEs
+    wire [3:0] grant;              // Grant signals from arbiter to PEs
+    wire [4:0] rd;
+    wire [4:0] rs1;
+    wire [4:0] rs2;
+    wire       mem_read;
+    wire       mem_write;
+    wire [31:0] mem_address;
+    wire       mem_ack;
+    wire       rdWrite;
+    wire       read_en;
+    wire       reg_select;
+    wire       regComplete;
+    wire [31:0] data_out1;
+    wire [31:0] data_out2;
+    wire [31:0] data_Store;
 
-    // Arbiter for managing bus contention
-    bus_arbiter arbiter (
+    wire [31:0] result_mux;
+
+
+    // Controller
+    cluster_controller ctrl (
         .clk(clk),
         .reset(reset),
-        .req(bus_req),
+        .instruction_mem(instruction_mem),
+        .PCsIM(PCsIM),
+        .InstReadEn(InstReadEn),
+        .PCinPE(PCinPE),
+        .instruction_outPE(instruction_outPE),
+        .PCoutPE(PCoutPE),
+        .execution_complete(execution_complete)
+    );
+
+    // Instruction Memory (e.g., ROM)
+    instruction_memory instr_mem (
+        .clk(clk),
+        .read_enable(InstReadEn),
+        .PC(PCsIM),
+        .instruction(instruction_mem)
+    );
+
+    // Arbiter
+    bus_arbiter arb (
+        .clk(clk),
+        .reset(reset),
+        .req(bus_request),
         .grant(grant)
     );
 
-    // Local Memory System
-    register_system local_memory (
-        .clk(clk),
-        .reset(reset),
-        .selRD(grant[0]?rdOut[0]:grant[1]?rdOut[1]:grant[2]?rdOut[2]:grant[3]:rdOut[3]:5'b0),        // Selects which reg to store into
-        .selRS1(grant[0]?rs1Out[0]:grant[1]?rs1Out[1]:grant[2]?rs1Out[2]:grant[3]:rs1Out[3]:5'b0),   // Selects which reg to read from
-        .selRS2(grant[0]?rs2Out[0]:grant[1]?rs2Out[1]:grant[2]?rs2Out[2]:grant[3]:rs2Out[3]:5'b0),   // Selects which reg to read from
-        .data_in(result_in[grant]),   // Data to write
-        .rdwrite(rdWrite[grant]),  // Write enable
-        .read_en(read_en[grant]),   // Read enable
-        .data_out1(Amux_in[grant]),   // Output data read from registers
-        .data_out2(Bmux_in[grant])    // Optional second output read from registers
+    //Data Registers Local Memory
+    register_system dataRegs (
+        .selRD(rd),
+        .selRS1(rs1),
+        .selRS2(rs2),
+        .reg_select(reg_select),
+        .data_in(data_Store),
+        .rdwrite(rdWrite),
+        .read_en(read_en),
+        .data_out1(data_out1),
+        .data_out2(data_out2),
+        .regComplete(regComplete)
     );
 
-    // Connect each PE to the bus interface
+    // 4 PE Interfaces
     genvar i;
     generate
-        for (i = 0; i < 4; i = i + 1) begin : bus_interface
-            bus_interface iface (
+        for (i = 0; i < 4; i = i + 1) begin : pe_interface_block
+            assign result_mux = (global_mem_write) ? global_mem_write_data : result_out[i*32 +: 32]; // Conditional operation
+
+            PE_system pe_intf (
                 .clk(clk),
                 .reset(reset),
-                .address(address[i]),
-                .result_in(result_in[i]),
-                .mem_read(mem_read[i]),
-                .mem_write(mem_write[i]),
-                .rdWrite(rd_write[i]),
-                .read_en(read_en[i]),
-                .reg_select(reg_select[i]),
-                .PCout(PCout[i]),
-                .mess_Reg(mess_Reg[i]),
+                .PCin(PCinPE[i*32 +: 32]),
+                .instructionBus(instruction_outPE[i*32 +: 32]),
+                .AmuxBus(data_out1),
+                .BmuxBus(data_out2),
+                .mem_ackBus(global_mem_ack),
+                .data_ReadyBus(regComplete),
+                .PCoutBus(PCoutPE[i*32 +: 32]),
+                .execution_complete(execution_complete[i]),
+                .result_outBus(result_mux),
+                .rs1OutBus(rs1),
+                .rs2OutBus(rs2),
+                .rdOutBus(rd),
+                .reg_selectBus(reg_select),
+                .mem_writeBus(global_mem_write),
+                .mem_readBus(global_mem_read),
+                .rd_writeBus(rdWrite),
+                .read_enBus(read_en),
+                .bus_request(bus_request[i]),
                 .grant(grant[i]),
-                .Amux(Amux_in[i]),
-                .Bmux(Bmux_in[i]),
-                .instruction(instruction[i]),
-                .PCin(PCin[i]),
-                .mem_ack(mem_ack[i]),
-                .data_Ready(data_Ready[i]),
-                .bus_request(bus_req[i])
+                .data_Store(data_Store),
+                .mem_addressBus(global_mem_address),
+                .memData(global_mem_read_data)
             );
         end
     endgenerate
+
 endmodule

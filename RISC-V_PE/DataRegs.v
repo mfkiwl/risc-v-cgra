@@ -1,6 +1,6 @@
 `include "mux32_1.v"
 `include "demux1_32.v"
-`include "reg.v"
+`include "Datareg.v"
 
 
 module register_system (
@@ -41,7 +41,7 @@ module register_system (
     genvar i;
     generate
         for (i = 0; i < 32; i = i + 1) begin : reg_block
-            Register reg_inst (
+            DataRegister reg_inst (
                 .clock(clk),
                 .reset(reset ? 1'b1:1'b0),
                 .r_enable(reg_enable[i]),

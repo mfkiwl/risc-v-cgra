@@ -13,6 +13,7 @@ module bus_interface (
     input       mem_writePE,     //Signal to write to global memory
     input       rd_writePE,      //Signal to write to local memory
     input       read_enPE,       //Signal to read from local memory
+    input       execution_completePE,
 
     //Outputs to the PE
     output reg [31:0] AmuxPE,    //Data being sent to A mux
@@ -34,11 +35,13 @@ module bus_interface (
     output reg       mem_writeBus,     //Signal to write to global memory
     output reg       rd_writeBus,      //Signal to write to local memory
     output reg       read_enBus,
+    output reg       execution_completeBus,
+    output reg [31:0]  data_Store,      //data_in for local memory
     input [31:0] AmuxBus,    //Data being sent to A mux
     input [31:0] BmuxBus,    //Data being sent to B mux
     input        mem_ackBus, //Memory acknowledgment signal coming from the global memory
     input        data_ReadyBus, //register read complete
-    input [31:0] memData,      //Data coming from global memory
+    input [31:0] memData      //Data coming from global memory
 );
 
     reg active; // Keep track of the bus request state
@@ -62,8 +65,9 @@ module bus_interface (
             rd_writeBus <= 0;
             read_enBus <= 0;
             active <= 0;
+            execution_completeBus <= 0;
         end else begin
-            if ((mem_readPE || mem_writePE || rd_writePE || read_enPE) && !active) begin
+            if ((mem_readPE || mem_writePE || rd_writePE || read_enPE || execution_completePE) && !active) begin
                 bus_request <= 1; // Request the bus
             end
             if (grant) begin
@@ -83,7 +87,7 @@ module bus_interface (
                 begin 
                     rdOutBus <= rdOutPE; //Forward select for local memory write
                     rd_writeBus <= rd_writePE;
-                    result_outBus <= result_inPE; //Result from ALU to be written in rd
+                    data_Store <= result_inPE; //Result from ALU to be written in rd
                 end
                 if (read_enPE)
                 begin
@@ -91,6 +95,11 @@ module bus_interface (
                     rs2OutBus <= rs2OutPE;
                     read_enBus <= read_enPE;
                     reg_selectBus <= reg_selectPE;
+                end
+                if (execution_completePE)
+                begin
+                    result_outBus <= result_inPE;
+                    execution_completeBus <= execution_completePE;
                 end
                 bus_request <= 0; // Clear the request once granted
                 active <= 1;

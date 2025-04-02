@@ -23,6 +23,7 @@ wire mem_write;
 wire [31:0] result_out;
 wire read_en;
 wire [31:0] PCout;
+wire execution_complete;
 
 // Instantiate the processing element module
 processing_element uut (
@@ -36,7 +37,6 @@ processing_element uut (
     .mem_address(mem_address),
     .reg_select(reg_select),
     .mem_read(mem_read),
-    .messReg(messReg),
     .rs1Out(rs1Out),
     .rs2Out(rs2Out),
     .rdOut(rdOut),
@@ -45,7 +45,8 @@ processing_element uut (
     .result_out(result_out),
     .PCout(PCout),
     .read_en(read_en),
-    .reset(reset)
+    .reset(reset),
+    .execution_complete(execution_complete)
 );
 
 // Generate clock signal
@@ -1050,7 +1051,7 @@ initial begin
 
     #30;
     //Expected result: b01000001000000010000000000000000
-    if (result_out == 32'bb01000001000000010000000000000000) 
+    if (result_out == 32'b01000001000000010000000000000000) 
     begin
         $display ("Result as expected");
     end

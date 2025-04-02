@@ -6,7 +6,7 @@ module PE_system (
     input reset,
     input grant,      //Grant signal from the arbiter
     input [31:0] PCin,    //Program counter being sent to the PE
-    input [31:0] instructionBus, //Instruction loaded into PE
+    input [31:0] instructionBus, //Instruction loaded into PE from controller
     input [31:0] AmuxBus,    //Data being sent to A mux
     input [31:0] BmuxBus,    //Data being sent to B mux
     input        mem_ackBus, //Memory acknowledgment signal coming from the global memory
@@ -23,7 +23,9 @@ module PE_system (
     output       mem_writeBus,     //Signal to write to global memory
     output       rd_writeBus,      //Signal to write to local memory
     output       read_enBus,
-    output bus_request    //Request signal sent to the arbiter
+    output       bus_request,    //Request signal sent to the arbiter
+    output       execution_complete,
+    output [31:0] data_Store      //data_in for local memory
 );
 
     // Internal signals
@@ -39,6 +41,7 @@ module PE_system (
     wire       mem_writePE;     //Signal to write to global memory
     wire       rd_writePE;      //Signal to write to local memory
     wire       read_enPE;       //Signal to read from local memory
+    wire       execution_completePE;
 
     //Outputs to the PE
     wire [31:0] AmuxPE;    //Data being sent to A mux
@@ -66,7 +69,8 @@ module PE_system (
         .mem_write(mem_writePE),
         .result_out(result_inPE),  // Output selected from output mux
         .read_en(read_enPE),            // Read enable to take data from rs1 and rs2
-        .PCout(PCoutPE)
+        .PCout(PCoutPE),
+        .execution_complete(execution_completePE)
     );
 
     //Instantiate the interface
@@ -106,6 +110,9 @@ module PE_system (
         .mem_ackBus(mem_ackBus),
         .data_ReadyBus(data_ReadyBus),
         .memData(memData),
+        .execution_completePE(execution_completePE),
+        .execution_completeBus(execution_complete),
+        .data_Store(data_Store)
     );
 endmodule
 

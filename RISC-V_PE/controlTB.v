@@ -42,6 +42,7 @@ wire reg_select;
 wire [31:0] immvalue;
 wire [4:0] rs1Out;
 wire [4:0] rs2Out;
+wire       execution_complete;
 
 // Instantiate the controller module
 controller uut (
@@ -79,7 +80,8 @@ controller uut (
     .ALURes(ALURes),
     .IRenable(IRenable),
     .decodeComplete(decodeComplete),
-    .reset(reset)
+    .reset(reset),
+    .execution_complete(execution_complete)
 );
 
 // Generate clock signal
